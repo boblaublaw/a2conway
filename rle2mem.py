@@ -96,9 +96,14 @@ for line in lines:
 print '\t */'
 
 lineNum=0
+plot=True
+varname="page"
 for row in xrange(len(lines)):
     for col in xrange(len(lines[row])):
         if lines[row][col] == '*':
+            if plot:
+                print '\tlo_plot(' + varname + ', ' + str(row) + ', ' + str(col) + ', 0xf);'
+                continue
             if row % 2:
                 print "\tbaseaddr[", hex(page1[row/2] + col),"] |= 0xF0;"
             else:

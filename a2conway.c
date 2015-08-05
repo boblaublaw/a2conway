@@ -49,6 +49,7 @@ typedef char            int8_t;   // 1 byte
 /* though we only use the first 20 pairs */
 /* for lores graphics mode 40 x 48 x 16 colors */
 /* we are using 40 x 40 x 16 */
+//uint8_t stats[MAXROW][MAXCOL];
 uint16_t page1[24]={
     0x0400, // triad 0
     0x0480,
@@ -116,24 +117,31 @@ void clearkeybuf()
     }
 }
 
-void waitforkeypress(uint8_t key)
+void wait_for_keypress(uint8_t key)
 {
     uint8_t c;
     clearkeybuf();
     for (;;) {
         if (kbhit() > 0) {
             c=cgetc();
-            printf ("key hit: %d\n", c);
+            //printf ("key hit: %d\n", c);
             clearkeybuf();
             if (c==key) {
-                printf ("done waiting for %u\n", key);
+                //printf ("done waiting for %u\n", key);
                 return;
             }
         }
     }
 }
 
-void gr(uint16_t page, uint16_t mode)
+void text_mode(void)
+{
+    softsw(SS_TEXT_MODE);
+    softsw(SS_FULLSCREEN_MODE);
+    softsw(SS_PAGE1);
+}
+
+void gr_mode(uint16_t page, uint16_t mode)
 {
     softsw(SS_GRAPHICS_MODE);
     softsw(mode);
@@ -144,7 +152,7 @@ void gr(uint16_t page, uint16_t mode)
 #define LORES_COLS              40
 #define LORES_ROWS              20
 
-void loclear(uint16_t baseaddr[], uint8_t color)
+void lo_clear(uint16_t baseaddr[], uint8_t color)
 {
     int8_t idx;
     // copy the color value into both the high and lo nibble
@@ -160,6 +168,11 @@ void loclear(uint16_t baseaddr[], uint8_t color)
     }
 }
 
+void text_clear(uint16_t baseaddr[])
+{
+    lo_clear(baseaddr, ' ');
+}
+
 int8_t keypress()
 {
     uint8_t *kp = (uint8_t *)KEYPRESS_BUF_ADDR;
@@ -173,7 +186,7 @@ int8_t keypress()
     return c;
 }
 
-void loplot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
+void lo_plot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
 {
     uint8_t pairrow = row / 2;
     uint8_t *rowptr = baseaddr[pairrow];
@@ -186,6 +199,16 @@ void loplot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
         rowptr[col] = (rowptr[col] & 0xF0 ) | color;
     }
 }
+
+void glider(uint16_t page[])
+{
+        lo_plot(page, 0, 1, 0xf);
+        lo_plot(page, 1, 2, 0xf);
+        lo_plot(page, 2, 0, 0xf);
+        lo_plot(page, 2, 1, 0xf);
+        lo_plot(page, 2, 2, 0xf);
+}
+
 void gospergun(uint8_t *baseaddr)
 {
         baseaddr[ 0x18 ] |= 0x0F;
@@ -235,7 +258,7 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     uint16_t seed = PEEK(RSEED1) + PEEK(RSEED2) * 256;
     srand(seed);
 
-    while (--count) {
+    while (count--) {
         r = rand();
         // use the high bit to determine which nibble we turn on
         row = r & ROWRANDMASK;
@@ -243,92 +266,132 @@ void randomize(uint16_t baseaddr[], uint16_t count)
         row %= MAXROW;
         col %= 40;
         //printf("turning on %d,%d with %04x\n", row, col, r);
-        loplot(baseaddr, row, col, 0xf);
+        lo_plot(baseaddr, row, col, 0xf);
     }
 }
 
 #define ROWABOVE(x) ( x == 0 ? (MAXROW -1)  : (x - 1))
 #define ROWBELOW(x) ( x == (MAXROW - 1) ? 0 : (x + 1))
-#define COLLEFT(x)  ( x == 0 ? (MAXCOL -1)  : (x - 1))
-#define COLRIGHT(x) ( x == (MAXCOL - 1) ? 0 : (x + 1))
+#define COLLEFT(y)  ( y == 0 ? (MAXCOL -1)  : (y - 1))
+#define COLRIGHT(y) ( y == (MAXCOL - 1) ? 0 : (y + 1))
 
 uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col) 
 {
-    uint8_t pairrow = row / 2;
-    uint8_t *rowptr = baseaddr[pairrow];
+    uint8_t val;
+    uint8_t *rowptr = baseaddr[ row / 2 ];
+
     if (row & 0x1)
-        return(rowptr[col] & 0xF0);
+        val = rowptr[col] & 0xF0;
     else
-        return(rowptr[col] & 0x0F);
+        val = rowptr[col] & 0x0F;
+
+    if (val)
+        return 1;
+    return 0;
 }
 
 uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
     uint8_t count = 0;
-    if (peek_pixel(baseaddr, ROWABOVE(row), col))
-        ++count;
-    if (peek_pixel(baseaddr, ROWBELOW(row), col))
-        ++count;
-    if (peek_pixel(baseaddr, row, COLLEFT(col)))
-        ++count;
-    if (peek_pixel(baseaddr, row, COLRIGHT(col)))
-        ++count;
-    if (peek_pixel(baseaddr, ROWABOVE(row), COLLEFT(col)))
-        ++count;
-    if (peek_pixel(baseaddr, ROWBELOW(row), COLLEFT(col)))
-        ++count;
-    if (peek_pixel(baseaddr, ROWABOVE(row), COLRIGHT(col)))
-        ++count;
-    if (peek_pixel(baseaddr, ROWBELOW(row), COLRIGHT(col)))
-        ++count;
+    if (peek_pixel(baseaddr, ROWABOVE(row), col)) {
+        count++;
+        //printf("\t%d,%d has a neighbor above\n", row, col);
+    }
+    if (peek_pixel(baseaddr, ROWBELOW(row), col)) {
+        count++;
+        //printf("\t%d,%d has a neighbor below\n", row, col);
+    }
+    if (peek_pixel(baseaddr, row, COLLEFT(col))) {
+        count++;
+        //printf("\t%d,%d has a neighbor to the left\n", row, col);
+    }
+    if (peek_pixel(baseaddr, row, COLRIGHT(col))) {
+        count++;
+        //printf("\t%d,%d has a neighbor to the right\n", row, col);
+    }
+    if (peek_pixel(baseaddr, ROWABOVE(row), COLLEFT(col))) {
+        count++;
+        //printf("\t%d,%d has a neighbor above left\n", row, col);
+    }
+    if (peek_pixel(baseaddr, ROWBELOW(row), COLLEFT(col))) {
+        count++;
+        //printf("\t%d,%d has a neighbor below left\n", row, col);
+    }
+    if (peek_pixel(baseaddr, ROWABOVE(row), COLRIGHT(col))) {
+        count++;
+        //printf("\t%d,%d has a neighbor above right\n", row, col);
+    }
+    if (peek_pixel(baseaddr, ROWBELOW(row), COLRIGHT(col))) {
+        count++;
+        //printf("\t%d,%d has a neighbor below right\n", row, col);
+    }
     return count;
 }
 
 uint16_t analyze(uint16_t src[], uint16_t dst[])
 {
-    uint8_t row, col, n, alive;
+    uint8_t row, col, n, x;
     uint16_t total=0;
-    for (row=0; row < MAXROW; ++row) {
-        for (col=0; col < MAXROW; ++col) {
-            alive=0;
+
+    for (row=0; row < MAXROW; row++) {
+        for (col=0; col < MAXCOL; col++) {
             n = count_neighbors(src, row, col);
-            //if (n)
-            //    printf("%d,%d has %d neighbors\n", row, col, n);
-            if (peek_pixel(dst, row, col)) {
-                alive=1;
-            }
-            if (alive) {
-                if ((n > 1) && (n < 3)) {
-                    loplot(dst, row, col, 0xf);
-                    ++total;
+            //stats[row][col]=n;
+            if (x=peek_pixel(src, row, col)) {
+                if ((n == 2) || (n == 3)) {
+                    lo_plot(dst, row, col, 0xF);
+                    //printf ("%d,%d stays alive (res: %x, %d neighbors)\n", row, col, x, n);
+                    //wait_for_keypress(CH_ENTER);
+                    total++;
                 }
                 else
-                    loplot(dst, row, col, 0x0);
+                    lo_plot(dst, row, col, 0x0);
             }
             else {
                 if (n == 3) {
-                    loplot(dst, row, col, 0xf);
-                    ++total;
+                    lo_plot(dst, row, col, 0xF);
+                    //printf ("%d,%d stays alive (res: %x, %d neighbors)\n", row, col, x, n);
+                    //wait_for_keypress(CH_ENTER);
+                    total++;
                 }
                 else
-                    loplot(dst, row, col, 0x0);
+                    lo_plot(dst, row, col, 0x0);
             }
         }
     }
-    //printf("total is %d\n", total);
     return total;
 }
 
 void run(void) 
 {
+    //uint8_t row,col,i;
     uint16_t total;
     while (1) {
         analyze(page1, page2);
+#if 0
+        text_mode();
+        POKE(TEXTWINDOW_TOP_EDGE,0);
+        gotoxy(0,0);
+        i=0;
+        for (row=0; row < MAXROW; row++) {
+            for (col=0; col < MAXCOL; col++) {
+                if(stats[row][col]) {
+                    printf("%d,%d has %d neighbors\n", row,col,stats[row][col]);
+                    i+=1;
+                }
+                if (i % 10 == 0) {
+                    wait_for_keypress(CH_ENTER);
+                }
+            }
+        }
+        exit(0);
+#endif
         softsw(SS_PAGE2);
         total = analyze(page2, page1);
         if (total == 0) {
             //randomize(page1, 400);
-            gospergun(LORES_PAGE1_BASE);
+            //gospergun(LORES_PAGE1_BASE);
+            glider(page1);
         }
         softsw(SS_PAGE1);
     }
@@ -336,25 +399,28 @@ void run(void)
 
 int main()
 {
+    //memset(stats, 0, MAXROW * MAXCOL);
+
     // our program just uses the bottom 4 lines of the display
     gotoxy(0,LORES_ROWS);
     POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
 
     printf ("built at %s %s\npress enter to start\n",
         __DATE__, __TIME__);
-    waitforkeypress(CH_ENTER);
+    wait_for_keypress(CH_ENTER);
 
-    gr(SS_PAGE1, SS_MIXED_MODE);
-    loclear(page1, TGI_COLOR_BLACK);
+    gr_mode(SS_PAGE1, SS_MIXED_MODE);
+    lo_clear(page1, TGI_COLOR_BLACK);
     
     // randomly create critters
     //randomize(page1, 400);
-    gospergun(LORES_PAGE1_BASE);
+    //gospergun(LORES_PAGE1_BASE);
+    glider(page1);
 
     run();
     
     printf ("all done! press enter to end\n");
-    waitforkeypress(CH_ENTER);
+    wait_for_keypress(CH_ENTER);
     POKE(TEXTWINDOW_TOP_EDGE,0);
     softsw(SS_TEXT_MODE);
     
