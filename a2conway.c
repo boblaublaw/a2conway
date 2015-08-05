@@ -177,9 +177,14 @@ void loplot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
 {
     uint8_t pairrow = row / 2;
     uint8_t *rowptr = baseaddr[pairrow];
-    if (row & 0x1)
+    if (row & 0x1) {
         color <<= 4;
-    rowptr[col] |= color;
+        rowptr[col] = (rowptr[col] & 0x0F ) | color;
+    }
+    else {
+        color &= 0xF;
+        rowptr[col] = (rowptr[col] & 0xF0 ) | color;
+    }
 }
 
 void randomize(uint16_t baseaddr[], uint16_t count)
@@ -239,28 +244,35 @@ uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
 uint16_t analyze(uint16_t src[], uint16_t dst[])
 {
     uint8_t row, col, n, alive;
-    uint16_t total;
+    uint16_t total=0;
     for (row=0; row < MAXROW; ++row) {
         for (col=0; col < MAXROW; ++col) {
             alive=0;
             n = count_neighbors(src, row, col);
-            //printf("%d,%d has %d neighbors\n", row, col, n);
+            //if (n)
+            //    printf("%d,%d has %d neighbors\n", row, col, n);
             if (peek_pixel(dst, ROWBELOW(row), COLRIGHT(col))) {
                 alive=1;
-                ++total;
             }
             if (alive) {
                 if ((n > 1) && (n < 3)) {
                     loplot(dst, row, col, 0xf);
+                    ++total;
                 }
+                else
+                    loplot(dst, row, col, 0x0);
             }
             else {
                 if (n == 3) {
                     loplot(dst, row, col, 0xf);
+                    ++total;
                 }
+                else
+                    loplot(dst, row, col, 0x0);
             }
         }
     }
+    printf("total is %d\n", total);
     return total;
 }
 
@@ -268,13 +280,10 @@ void run(void)
 {
     uint16_t total;
     while (1) {
-        loclear(page2, TGI_COLOR_BLACK);
-        total = analyze(page1, page2);
+        analyze(page1, page2);
         softsw(SS_PAGE2);
-        loclear(page1, TGI_COLOR_BLACK);
         total = analyze(page2, page1);
-        printf("total is %d\n", total);
-        if (total == 1)
+        if (total == 0)
             randomize(page1, 400);
         softsw(SS_PAGE1);
     }
