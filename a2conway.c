@@ -186,6 +186,45 @@ void loplot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
         rowptr[col] = (rowptr[col] & 0xF0 ) | color;
     }
 }
+void gospergun(uint8_t *baseaddr)
+{
+        baseaddr[ 0x18 ] |= 0x0F;
+        baseaddr[ 0x16 ] |= 0xF0;
+        baseaddr[ 0x18 ] |= 0xF0;
+        baseaddr[ 0x8c ] |= 0x0F;
+        baseaddr[ 0x8d ] |= 0x0F;
+        baseaddr[ 0x94 ] |= 0x0F;
+        baseaddr[ 0x95 ] |= 0x0F;
+        baseaddr[ 0xa2 ] |= 0x0F;
+        baseaddr[ 0xa3 ] |= 0x0F;
+        baseaddr[ 0x8b ] |= 0xF0;
+        baseaddr[ 0x8f ] |= 0xF0;
+        baseaddr[ 0x94 ] |= 0xF0;
+        baseaddr[ 0x95 ] |= 0xF0;
+        baseaddr[ 0xa2 ] |= 0xF0;
+        baseaddr[ 0xa3 ] |= 0xF0;
+        baseaddr[ 0x100 ] |= 0x0F;
+        baseaddr[ 0x101 ] |= 0x0F;
+        baseaddr[ 0x10a ] |= 0x0F;
+        baseaddr[ 0x110 ] |= 0x0F;
+        baseaddr[ 0x114 ] |= 0x0F;
+        baseaddr[ 0x115 ] |= 0x0F;
+        baseaddr[ 0x100 ] |= 0xF0;
+        baseaddr[ 0x101 ] |= 0xF0;
+        baseaddr[ 0x10a ] |= 0xF0;
+        baseaddr[ 0x10e ] |= 0xF0;
+        baseaddr[ 0x110 ] |= 0xF0;
+        baseaddr[ 0x111 ] |= 0xF0;
+        baseaddr[ 0x116 ] |= 0xF0;
+        baseaddr[ 0x118 ] |= 0xF0;
+        baseaddr[ 0x18a ] |= 0x0F;
+        baseaddr[ 0x190 ] |= 0x0F;
+        baseaddr[ 0x198 ] |= 0x0F;
+        baseaddr[ 0x18b ] |= 0xF0;
+        baseaddr[ 0x18f ] |= 0xF0;
+        baseaddr[ 0x20c ] |= 0x0F;
+        baseaddr[ 0x20d ] |= 0x0F;
+}
 
 void randomize(uint16_t baseaddr[], uint16_t count)
 {
@@ -287,8 +326,10 @@ void run(void)
         analyze(page1, page2);
         softsw(SS_PAGE2);
         total = analyze(page2, page1);
-        if (total == 0)
-            randomize(page1, 400);
+        if (total == 0) {
+            //randomize(page1, 400);
+            gospergun(LORES_PAGE1_BASE);
+        }
         softsw(SS_PAGE1);
     }
 }
@@ -307,7 +348,8 @@ int main()
     loclear(page1, TGI_COLOR_BLACK);
     
     // randomly create critters
-    randomize(page1, 400);
+    //randomize(page1, 400);
+    gospergun(LORES_PAGE1_BASE);
 
     run();
     
