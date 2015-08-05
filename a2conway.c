@@ -49,7 +49,6 @@ typedef char            int8_t;   // 1 byte
 /* though we only use the first 20 pairs */
 /* for lores graphics mode 40 x 48 x 16 colors */
 /* we are using 40 x 40 x 16 */
-uint16_t runs;
 uint16_t page1[24]={
     0x0400, // triad 0
     0x0480,
@@ -194,10 +193,8 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     uint8_t  row, col;
     // The Apple zero page has some semi-random garbage
     // suitable for seeding our PRNG
-    uint16_t seed; //= PEEK(RSEED1) + PEEK(RSEED2) * 256;
-    ++runs;
-    printf ("new seed is %x\n", seed + runs);
-    srand (seed + runs);
+    uint16_t seed = PEEK(RSEED1) + PEEK(RSEED2) * 256;
+    srand(seed);
 
     while (--count) {
         r = rand();
@@ -298,8 +295,6 @@ void run(void)
 
 int main()
 {
-    runs = 0;
-
     // our program just uses the bottom 4 lines of the display
     gotoxy(0,LORES_ROWS);
     POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
