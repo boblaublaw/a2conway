@@ -49,6 +49,7 @@ typedef char            int8_t;   // 1 byte
 /* though we only use the first 20 pairs */
 /* for lores graphics mode 40 x 48 x 16 colors */
 /* we are using 40 x 40 x 16 */
+uint16_t runs;
 uint16_t page1[24]={
     0x0400, // triad 0
     0x0480,
@@ -191,6 +192,12 @@ void randomize(uint16_t baseaddr[], uint16_t count)
 {
     uint16_t r;
     uint8_t  row, col;
+    // The Apple zero page has some semi-random garbage
+    // suitable for seeding our PRNG
+    uint16_t seed; //= PEEK(RSEED1) + PEEK(RSEED2) * 256;
+    ++runs;
+    printf ("new seed is %x\n", seed + runs);
+    srand (seed + runs);
 
     while (--count) {
         r = rand();
@@ -251,7 +258,7 @@ uint16_t analyze(uint16_t src[], uint16_t dst[])
             n = count_neighbors(src, row, col);
             //if (n)
             //    printf("%d,%d has %d neighbors\n", row, col, n);
-            if (peek_pixel(dst, ROWBELOW(row), COLRIGHT(col))) {
+            if (peek_pixel(dst, row, col)) {
                 alive=1;
             }
             if (alive) {
@@ -272,7 +279,7 @@ uint16_t analyze(uint16_t src[], uint16_t dst[])
             }
         }
     }
-    printf("total is %d\n", total);
+    //printf("total is %d\n", total);
     return total;
 }
 
@@ -291,10 +298,7 @@ void run(void)
 
 int main()
 {
-    // The Apple zero page has some semi-random garbage
-    // suitable for seeding our PRNG
-    uint16_t seed = PEEK(RSEED1) + PEEK(RSEED2) * 256;
-    srand (seed);
+    runs = 0;
 
     // our program just uses the bottom 4 lines of the display
     gotoxy(0,LORES_ROWS);
