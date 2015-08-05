@@ -18,8 +18,13 @@ typedef unsigned char   uint8_t;  // 1 byte
 typedef char            int8_t;   // 1 byte
 
 // defines
-#define ROWMASK                 0x00FF
-#define COLMASK                 0xFF00
+#define ROWRANDMASK             0x00FF
+#define COLRANDMASK             0xFF00
+
+#define MAXROWPAIR              20
+#define MAXROW                  ( MAXROWPAIR * 2 )
+#define MAXCOL                  40
+
 #define KEYPRESS_BUF_ADDR       0xC000
 #define KEYCLEAR_BUF_ADDR       0xC010
 #define SS_GRAPHICS_MODE        0xC050
@@ -168,17 +173,6 @@ int8_t keypress()
     return c;
 }
 
-uint16_t get_random_bits(uint8_t count)
-{
-    uint16_t result = rand();
-    uint16_t mask = 1;
-    if (count > 1)
-       mask = mask << (count - 1);
-    mask -= 1;
-    printf ("mask is %04x\n", mask);
-    return result & mask;
-}
-
 void loplot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
 {
     uint8_t pairrow = row / 2;
@@ -188,28 +182,102 @@ void loplot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
     rowptr[col] |= color;
 }
 
-void randomize(uint16_t baseaddr[], uint8_t maxrow, uint16_t count)
+void randomize(uint16_t baseaddr[], uint16_t count)
 {
     uint16_t r;
     uint8_t  row, col;
 
-    printf ("randomization complete. press enter to continue\n");
-    waitforkeypress(CH_ENTER);
     while (--count) {
         r = rand();
         // use the high bit to determine which nibble we turn on
-        row = r & ROWMASK;
-        col = (r & COLMASK) >> 8;
-        row %= (maxrow * 2);
+        row = r & ROWRANDMASK;
+        col = (r & COLRANDMASK) >> 8;
+        row %= MAXROW;
         col %= 40;
         //printf("turning on %d,%d with %04x\n", row, col, r);
         loplot(baseaddr, row, col, 0xf);
     }
 }
 
+#define ROWABOVE(x) ( x == 0 ? (MAXROW -1)  : (x - 1))
+#define ROWBELOW(x) ( x == (MAXROW - 1) ? 0 : (x + 1))
+#define COLLEFT(x)  ( x == 0 ? (MAXCOL -1)  : (x - 1))
+#define COLRIGHT(x) ( x == (MAXCOL - 1) ? 0 : (x + 1))
+
+uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col) 
+{
+    uint8_t pairrow = row / 2;
+    uint8_t *rowptr = baseaddr[pairrow];
+    if (row & 0x1)
+        return(rowptr[col] & 0xF0);
+    else
+        return(rowptr[col] & 0x0F);
+}
+
+uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
+{
+    uint8_t count = 0;
+    if (peek_pixel(baseaddr, ROWABOVE(row), col))
+        ++count;
+    if (peek_pixel(baseaddr, ROWBELOW(row), col))
+        ++count;
+    if (peek_pixel(baseaddr, row, COLLEFT(col)))
+        ++count;
+    if (peek_pixel(baseaddr, row, COLRIGHT(col)))
+        ++count;
+    if (peek_pixel(baseaddr, ROWABOVE(row), COLLEFT(col)))
+        ++count;
+    if (peek_pixel(baseaddr, ROWBELOW(row), COLLEFT(col)))
+        ++count;
+    if (peek_pixel(baseaddr, ROWABOVE(row), COLRIGHT(col)))
+        ++count;
+    if (peek_pixel(baseaddr, ROWBELOW(row), COLRIGHT(col)))
+        ++count;
+    return count;
+}
+
+uint16_t analyze(uint16_t src[], uint16_t dst[])
+{
+    uint8_t row, col, n, alive;
+    uint16_t total;
+    for (row=0; row < MAXROW; ++row) {
+        for (col=0; col < MAXROW; ++col) {
+            alive=0;
+            n = count_neighbors(src, row, col);
+            //printf("%d,%d has %d neighbors\n", row, col, n);
+            if (peek_pixel(dst, ROWBELOW(row), COLRIGHT(col))) {
+                alive=1;
+                ++total;
+            }
+            if (alive) {
+                if ((n > 1) && (n < 3)) {
+                    loplot(dst, row, col, 0xf);
+                }
+            }
+            else {
+                if (n == 3) {
+                    loplot(dst, row, col, 0xf);
+                }
+            }
+        }
+    }
+    return total;
+}
+
 void run(void) 
 {
-
+    uint16_t total;
+    while (1) {
+        loclear(page2, TGI_COLOR_BLACK);
+        total = analyze(page1, page2);
+        softsw(SS_PAGE2);
+        loclear(page1, TGI_COLOR_BLACK);
+        total = analyze(page2, page1);
+        printf("total is %d\n", total);
+        if (total == 1)
+            randomize(page1, 400);
+        softsw(SS_PAGE1);
+    }
 }
 
 int main()
@@ -231,7 +299,7 @@ int main()
     loclear(page1, TGI_COLOR_BLACK);
     
     // randomly create critters
-    randomize(page1, LORES_ROWS, 400);
+    randomize(page1, 400);
 
     run();
     
