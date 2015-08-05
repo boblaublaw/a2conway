@@ -28,8 +28,10 @@ page1 = [
     0x0750,
     0x07D0 ]
 
+
 def process_input(handle):
-    metavars={}
+    metavars = {}
+    lines = []
     for line in handle:
         if line[0] == '#':
             continue
@@ -40,44 +42,51 @@ def process_input(handle):
                 key , val = part.split('=')
                 metavars[key.strip()] = val.strip()
             continue       
-        #print line
-        count="1" # deliberately a string
-        default=True
-        line=line.strip()
+        count = "1" # deliberately a string
+        default = True
+        line = line.strip()
+        totalLines = int(metavars['y'])
+        if len(lines) == 0:
+            for x in xrange(totalLines):
+                lines.append("")
+            currline = 0
         while(len(line)):
-            curr=line[0]
-            line=line[1:]
-            if curr == '!':
-                print
-                return
-            elif curr.isspace():
-                sys.exit(-1)
-            elif curr == '$':
-                sys.stdout.write(int(count) * "\n")
-                count="1"
-                default=True
-            elif curr == 'o':
-                sys.stdout.write(int(count) * "*")
-                count="1"
-                default=True
-            elif curr == 'b':
-                sys.stdout.write(int(count) * " ")
-                count="1"
-                default=True
-            elif curr.isdigit():
-                # greedily grab up numbers
-                #print "curr is a number: ", curr
+            currchar = line[0]
+            line = line[1:]
+            if currchar == '!':
+                return lines
+            elif currchar == '$':
+                n = int(count)
+                currline = currline + n
+                count = "1"
+                default = True
+            elif currchar == 'o':
+                n = int(count)
+                buf = "*" * n
+                lines[currline] = lines[currline] + buf
+                count = "1"
+                default = True
+            elif currchar == 'b':
+                n = int(count)
+                buf = " " * n
+                lines[currline] = lines[currline] + buf
+                count = "1"
+                default = True
+            elif currchar.isdigit():
                 if default:
-                    count=curr
-                    default=False
+                    count = currchar
+                    default = False
                 else:
-                    count=count + curr
+                    count = count + currchar
             else:
                 print "WTF is this"
                 sys.exit(-1)
+    return lines
                 
 
 if len(sys.argv) == 1:
-    process_input(sys.stdin)
+    l = process_input(sys.stdin)
 elif len(sys.argv) == 2:
-    process_input(open(sys.argv[1], 'r'))
+    l = process_input(open(sys.argv[1], 'r'))
+for line in l:
+    print line
