@@ -3,30 +3,30 @@ import sys
 from collections import defaultdict
 
 page1 = [
-    0x0400, # triad 0
-    0x0480,
-    0x0500,
-    0x0580,
-    0x0600,
-    0x0680,
-    0x0700,
-    0x0780,
-    0x0428, # triad 1
-    0x04A8,
-    0x0528,
-    0x05A8,
-    0x0628,
-    0x06A8,
-    0x0728,
-    0x07A8,
-    0x0450, # triad 2
-    0x04D0,
-    0x0550,
-    0x05D0,
-    0x0650,
-    0x06D0,
-    0x0750,
-    0x07D0 ]
+    0x0000, # triad 0
+    0x0080,
+    0x0100,
+    0x0180,
+    0x0200,
+    0x0280,
+    0x0300,
+    0x0380,
+    0x0028, # triad 1
+    0x00A8,
+    0x0128,
+    0x01A8,
+    0x0228,
+    0x02A8,
+    0x0328,
+    0x03A8,
+    0x0050, # triad 2
+    0x00D0,
+    0x0150,
+    0x01D0,
+    0x0250,
+    0x02D0,
+    0x0350,
+    0x03D0 ]
 
 
 def process_input(handle):
@@ -85,8 +85,21 @@ def process_input(handle):
                 
 
 if len(sys.argv) == 1:
-    l = process_input(sys.stdin)
+    lines = process_input(sys.stdin)
 elif len(sys.argv) == 2:
-    l = process_input(open(sys.argv[1], 'r'))
-for line in l:
-    print line
+    lines = process_input(open(sys.argv[1], 'r'))
+
+print '\t/*'
+print '\t/* shape to create:'
+for line in lines:
+    print '\t * \t',line
+print '\t */'
+
+lineNum=0
+for row in xrange(len(lines)):
+    for col in xrange(len(lines[row])):
+        if lines[row][col] == '*':
+            if row % 2:
+                print "\tbaseaddr[", hex(page1[row/2] + col),"] |= 0xF0;"
+            else:
+                print "\tbaseaddr[", hex(page1[row/2] + col),"] |= 0x0F;"
