@@ -27,14 +27,18 @@ typedef char            int8_t;   // 1 byte
 
 #define KEYPRESS_BUF_ADDR       0xC000
 #define KEYCLEAR_BUF_ADDR       0xC010
-#define SS_GRAPHICS_MODE        0xC050
-#define SS_TEXT_MODE            0xC051
-#define SS_FULLSCREEN_MODE      0xC052
-#define SS_MIXED_MODE           0xC053
-#define SS_PAGE1                0xC054
-#define SS_PAGE2                0xC055
-#define SS_LORES_MODE           0xC056
-#define SS_HIRES_MODE           0xC057
+
+#define SS_80COLOFF             0xC00C
+#define SS_80COLON              0xC00D
+
+#define SS_TEXTOFF              0xC050
+#define SS_TEXTON               0xC051
+#define SS_MIXEDOFF             0xC052
+#define SS_MIXEDON              0xC053
+#define SS_PAGE2OFF             0xC054
+#define SS_PAGE2ON              0xC055
+#define SS_HIRESOFF             0xC056
+#define SS_HIRESON              0xC057
 #define softsw(x)               POKE(x,0)
 
 #define LORES_PAGE1_BASE        0x400
@@ -136,17 +140,17 @@ void wait_for_keypress(uint8_t key)
 
 void text_mode(void)
 {
-    softsw(SS_TEXT_MODE);
-    softsw(SS_FULLSCREEN_MODE);
-    softsw(SS_PAGE1);
+    softsw(SS_TEXTON);
+    softsw(SS_MIXEDOFF);
+    softsw(SS_PAGE2OFF);
 }
 
 void gr_mode(uint16_t page, uint16_t mode)
 {
-    softsw(SS_GRAPHICS_MODE);
+    softsw(SS_TEXTOFF);
     softsw(mode);
     softsw(page);
-    softsw(SS_LORES_MODE);
+    softsw(SS_HIRESOFF);
 }
 
 #define LORES_COLS              40
@@ -386,14 +390,14 @@ void run(void)
         }
         exit(0);
 #endif
-        softsw(SS_PAGE2);
+        softsw(SS_PAGE2ON);
         total = analyze(page2, page1);
         if (total == 0) {
             //randomize(page1, 400);
             gospergun(page1);
             //glider(page1);
         }
-        softsw(SS_PAGE1);
+        softsw(SS_PAGE2OFF);
     }
 }
 
@@ -409,7 +413,7 @@ int main()
         __DATE__, __TIME__);
     wait_for_keypress(CH_ENTER);
 
-    gr_mode(SS_PAGE1, SS_MIXED_MODE);
+    gr_mode(SS_PAGE2OFF, SS_MIXEDON);
     lo_clear(page1, TGI_COLOR_BLACK);
     
     // randomly create critters
@@ -422,7 +426,7 @@ int main()
     printf ("all done! press enter to end\n");
     wait_for_keypress(CH_ENTER);
     POKE(TEXTWINDOW_TOP_EDGE,0);
-    softsw(SS_TEXT_MODE);
+    softsw(SS_TEXTON);
     
     __asm__ ("JSR $FC58"); /* APPLESOFT HOME */
     return EXIT_SUCCESS;
