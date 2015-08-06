@@ -51,12 +51,15 @@ LD   = ld65
 
 EXELIST	=	a2conway 
 
+a2conway: a2conway.o glider.o simkins.o gospergun.o
+
 
 # --------------------------------------------------------------------------
 # Rules to make the binaries
 
 .PHONY:	all
 all:	$(EXELIST)
+
 
 # --------------------------------------------------------------------------
 # Overlay rules. Overlays need special ld65 configuration files.  Also, the
