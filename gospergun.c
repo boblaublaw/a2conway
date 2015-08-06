@@ -1,5 +1,9 @@
 #include "a2conway.h"
 
+/*
+ * Draws a Gosper Glider Gun
+ */
+
 void gospergun(uint16_t page[])
 {
         lo_clear(page, TGI_COLOR_BLACK);

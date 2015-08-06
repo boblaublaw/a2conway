@@ -1,5 +1,9 @@
 #include "a2conway.h"
 
+/*
+ * Draws a Simkins Glider Gun
+ */
+
 void simkins(uint16_t page[])
 {
         lo_clear(page, TGI_COLOR_BLACK);

@@ -9,62 +9,22 @@
 #include <peekpoke.h>   // POKE
 #include "a2conway.h"   // prototypes
 
-// globals:
-/* the base addresses for the 48 scanline pairs */
-/* though we only use the first 20 pairs */
-/* for lores graphics mode 40 x 48 x 16 colors */
-/* we are using 40 x 40 x 16 */
+/* GLOBALS:
+ *
+ * the base addresses for the 48 scanline pairs 
+ * though we only use the first 20 pairs 
+ * for lores graphics mode 40 x 48 x 16 colors 
+ * we are using 40 x 40 x 16 
+ */
 uint16_t page1[24]={
-    0x0400, // triad 0
-    0x0480,
-    0x0500,
-    0x0580,
-    0x0600,
-    0x0680,
-    0x0700,
-    0x0780,
-    0x0428, // triad 1
-    0x04A8,
-    0x0528,
-    0x05A8,
-    0x0628,
-    0x06A8,
-    0x0728,
-    0x07A8,
-    0x0450, // triad 2
-    0x04D0,
-    0x0550,
-    0x05D0,
-    0x0650,
-    0x06D0,
-    0x0750,
-    0x07D0 };
+    0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700, 0x0780,
+    0x0428, 0x04A8, 0x0528, 0x05A8, 0x0628, 0x06A8, 0x0728, 0x07A8,
+    0x0450, 0x04D0, 0x0550, 0x05D0, 0x0650, 0x06D0, 0x0750, 0x07D0 };
 
 uint16_t page2[24]={
-    0x0800, // triad 0
-    0x0880,
-    0x0900,
-    0x0980,
-    0x0A00,
-    0x0A80,
-    0x0B00,
-    0x0B80,
-    0x0828, // triad 1
-    0x08A8,
-    0x0928,
-    0x09A8,
-    0x0A28,
-    0x0AA8,
-    0x0B28,
-    0x0BA8,
-    0x0850, // triad 2
-    0x08D0,
-    0x0950,
-    0x09D0,
-    0x0A50,
-    0x0AD0,
-    0x0B50,
-    0x0BD0 };
+    0x0800, 0x0880, 0x0900, 0x0980, 0x0A00, 0x0A80, 0x0B00, 0x0B80,
+    0x0828, 0x08A8, 0x0928, 0x09A8, 0x0A28, 0x0AA8, 0x0B28, 0x0BA8,
+    0x0850, 0x08D0, 0x0950, 0x09D0, 0x0A50, 0x0AD0, 0x0B50, 0x0BD0 };
 
 void wait_for_keypress(uint8_t key)
 {
@@ -161,14 +121,10 @@ int main(void)
     printf("press enter to start\n");
     wait_for_keypress(CH_ENTER);
 
-    //asm("JSR $FC58"); // APPLESOFT HOME: WHY DOESNT THIS WORK?
-
     gotoxy(0,LORES_ROWS);
     POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
 
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
-    lo_clear(page1, TGI_COLOR_BLACK);
-    
     glider(page1);
 
     while (1) {
