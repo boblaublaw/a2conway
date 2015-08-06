@@ -32,15 +32,15 @@ uint16_t page2[24]={
  */
 void wait_for_keypress(uint8_t key)
 {
-    uint8_t c;
     CLEARKEYBUF;
     for (;;) {
         if (kbhit() > 0) {
-            c = cgetc();
-            CLEARKEYBUF;
-            if (c == key) {
+            if (key == cgetc())
+            {
+                CLEARKEYBUF;
                 return;
             }
+            CLEARKEYBUF;
         }
     }
 }
