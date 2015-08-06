@@ -69,16 +69,9 @@ uint16_t page2[24]={
 
 void clearkeybuf(void)
 {
-    /* return the last key press  */
-    uint8_t *kp = (uint8_t*)KEYPRESS_BUF_ADDR;
-    /* clear the last key press   */
-    uint8_t *kc = (uint8_t*)KEYCLEAR_BUF_ADDR;
-    uint8_t c;
-
     /* clear stragglers from the keyboard buffer */
-    while((c = kp[0]) > 127) {
-        printf ("wiping extra keystroke %d from buf\n", c);
-        kc[0]=0;
+    while((PEEK(KEYPRESS_BUF_ADDR)) > 127) {
+        POKE(KEYCLEAR_BUF_ADDR, 0);
     }
 }
 
@@ -88,9 +81,9 @@ void wait_for_keypress(uint8_t key)
     clearkeybuf();
     for (;;) {
         if (kbhit() > 0) {
-            c=cgetc();
+            c = cgetc();
             clearkeybuf();
-            if (c==key) {
+            if (c == key) {
                 return;
             }
         }
@@ -161,94 +154,6 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     }
 }
 
-#define ROWABOVE(x) ( x == 0 ? (MAXROW -1)  : (x - 1))
-#define ROWBELOW(x) ( x == (MAXROW - 1) ? 0 : (x + 1))
-#define COLLEFT(y)  ( y == 0 ? (MAXCOL -1)  : (y - 1))
-#define COLRIGHT(y) ( y == (MAXCOL - 1) ? 0 : (y + 1))
-
-uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col) 
-{
-    uint8_t val;
-    uint8_t *rowptr = baseaddr[ row / 2 ];
-
-    if (row & 0x1)
-        val = rowptr[col] & 0xF0;
-    else
-        val = rowptr[col] & 0x0F;
-
-    if (val)
-        return 1;
-    return 0;
-}
-
-uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
-{
-    uint8_t count = 0;
-    if (peek_pixel(baseaddr, ROWABOVE(row), col)) {
-        count++;
-        //printf("\t%d,%d has a neighbor above\n", row, col);
-    }
-    if (peek_pixel(baseaddr, ROWBELOW(row), col)) {
-        count++;
-        //printf("\t%d,%d has a neighbor below\n", row, col);
-    }
-    if (peek_pixel(baseaddr, row, COLLEFT(col))) {
-        count++;
-        //printf("\t%d,%d has a neighbor to the left\n", row, col);
-    }
-    if (peek_pixel(baseaddr, row, COLRIGHT(col))) {
-        count++;
-        //printf("\t%d,%d has a neighbor to the right\n", row, col);
-    }
-    if (peek_pixel(baseaddr, ROWABOVE(row), COLLEFT(col))) {
-        count++;
-        //printf("\t%d,%d has a neighbor above left\n", row, col);
-    }
-    if (peek_pixel(baseaddr, ROWBELOW(row), COLLEFT(col))) {
-        count++;
-        //printf("\t%d,%d has a neighbor below left\n", row, col);
-    }
-    if (peek_pixel(baseaddr, ROWABOVE(row), COLRIGHT(col))) {
-        count++;
-        //printf("\t%d,%d has a neighbor above right\n", row, col);
-    }
-    if (peek_pixel(baseaddr, ROWBELOW(row), COLRIGHT(col))) {
-        count++;
-        //printf("\t%d,%d has a neighbor below right\n", row, col);
-    }
-    return count;
-}
-
-uint16_t analyze(uint16_t src[], uint16_t dst[])
-{
-    uint8_t row, col, n, x;
-    uint16_t total=0;
-
-    for (row=0; row < MAXROW; row++) {
-        for (col=0; col < MAXCOL; col++) {
-            n = count_neighbors(src, row, col);
-            if (x=peek_pixel(src, row, col)) {
-                if ((n == 2) || (n == 3)) {
-                    lo_plot(dst, row, col, 0xF);
-                    total++;
-                }
-                else
-                    lo_plot(dst, row, col, 0x0);
-            }
-            else {
-                if (n == 3) {
-                    lo_plot(dst, row, col, 0xF);
-                    total++;
-                }
-                else
-                    lo_plot(dst, row, col, 0x0);
-            }
-        }
-    }
-    return total;
-}
-
-
 int main(void)
 {
     uint8_t c;
@@ -296,9 +201,9 @@ int main(void)
             else
                 printf("ignoring keypress %d\n", c);
         }
-        analyze(page1, page2);
+        naive_analyze(page1, page2);
         softsw(SS_PAGE2ON);
-        analyze(page2, page1);
+        naive_analyze(page2, page1);
         softsw(SS_PAGE2OFF);
     }
     

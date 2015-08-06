@@ -51,7 +51,7 @@ LD   = ld65
 
 EXELIST	=	a2conway 
 
-a2conway: a2conway.o glider.o simkins.o gospergun.o
+a2conway: a2conway.o glider.o simkins.o gospergun.o naive.o
 
 
 # --------------------------------------------------------------------------
