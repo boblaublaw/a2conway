@@ -2,6 +2,7 @@
 
 void simkins(uint16_t page[])
 {
+        lo_clear(page, TGI_COLOR_BLACK);
         lo_plot(page, 0, 0, 0xf);
         lo_plot(page, 0, 1, 0xf);
         lo_plot(page, 0, 7, 0xf);

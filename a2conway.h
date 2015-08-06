@@ -1,3 +1,4 @@
+#include <apple2enh.h>          // CH_ENTER, TGI_*
 
 // typedefs
 typedef unsigned long   uint32_t; // 4 bytes
@@ -41,8 +42,8 @@ typedef char            int8_t;   // 1 byte
 #define LORES_COLS              40
 #define LORES_ROWS              20
 
-void clearkeybuf(void);
-void wait_for_keypress(uint8_t key);
+#define CLEARKEYBUF             while((PEEK(KEYPRESS_BUF_ADDR)) > 127) POKE(KEYCLEAR_BUF_ADDR, 0)
+
 void text_mode(void);
 void gr_mode(uint16_t page, uint16_t mode);
 void lo_clear(uint16_t baseaddr[], uint8_t color);

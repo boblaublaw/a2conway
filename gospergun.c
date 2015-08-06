@@ -2,6 +2,7 @@
 
 void gospergun(uint16_t page[])
 {
+        lo_clear(page, TGI_COLOR_BLACK);
         lo_plot(page, 0, 24, 0xf);
         lo_plot(page, 1, 22, 0xf);
         lo_plot(page, 1, 24, 0xf);

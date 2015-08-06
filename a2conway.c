@@ -7,7 +7,6 @@
 #include <string.h>
 #include <conio.h>      // kbhit, cgetc
 #include <peekpoke.h>   // POKE
-#include <apple2enh.h>  // CH_ENTER
 #include "a2conway.h"   // prototypes
 
 // globals:
@@ -67,22 +66,14 @@ uint16_t page2[24]={
     0x0B50,
     0x0BD0 };
 
-void clearkeybuf(void)
-{
-    /* clear stragglers from the keyboard buffer */
-    while((PEEK(KEYPRESS_BUF_ADDR)) > 127) {
-        POKE(KEYCLEAR_BUF_ADDR, 0);
-    }
-}
-
 void wait_for_keypress(uint8_t key)
 {
     uint8_t c;
-    clearkeybuf();
+    CLEARKEYBUF;
     for (;;) {
         if (kbhit() > 0) {
             c = cgetc();
-            clearkeybuf();
+            CLEARKEYBUF;
             if (c == key) {
                 return;
             }
@@ -141,6 +132,7 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     // suitable for seeding our PRNG
     uint16_t seed = PEEK(RSEED1) + PEEK(RSEED2) * 256;
     srand(seed);
+    lo_clear(page1, TGI_COLOR_BLACK);
 
     while (count--) {
         r = rand();
@@ -182,24 +174,21 @@ int main(void)
     while (1) {
         if (kbhit() > 0) {
             c=cgetc();
-            clearkeybuf();
+            CLEARKEYBUF;
+
             if (c == 'p') {
                 printf("PAUSED. Press Enter to Continue.\n");
                 wait_for_keypress(CH_ENTER);
                 continue;
             }
-            if (c == 'q') 
+            else if (c == 'q') 
                 break;
-            // every choice after this point requires clearing
-            lo_clear(page1, TGI_COLOR_BLACK);
-            if (c == 'r') 
+            else if (c == 'r') 
                 randomize(page1, 400);
             else if (c == 'g')
                 gospergun(page1);
             else if (c == 's')
                 simkins(page1);
-            else
-                printf("ignoring keypress %d\n", c);
         }
         naive_analyze(page1, page2);
         softsw(SS_PAGE2ON);
