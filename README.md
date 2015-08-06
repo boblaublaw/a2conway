@@ -1,4 +1,4 @@
-# Conway's Game Of Life written in C for the Apple II
+# Conway's Game Of Life in C for the Apple II
 (an exercise in constrained 8-bit 6502 C programming)
 
 dependencies:
