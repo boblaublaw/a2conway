@@ -89,10 +89,8 @@ void wait_for_keypress(uint8_t key)
     for (;;) {
         if (kbhit() > 0) {
             c=cgetc();
-            //printf ("key hit: %d\n", c);
             clearkeybuf();
             if (c==key) {
-                //printf ("done waiting for %u\n", key);
                 return;
             }
         }
@@ -114,9 +112,6 @@ void gr_mode(uint16_t page, uint16_t mode)
     softsw(SS_HIRESOFF);
 }
 
-#define LORES_COLS              40
-#define LORES_ROWS              20
-
 void lo_clear(uint16_t baseaddr[], uint8_t color)
 {
     int8_t idx;
@@ -128,22 +123,7 @@ void lo_clear(uint16_t baseaddr[], uint8_t color)
     // write this value into every memory address:
     for (idx = 0; idx < LORES_ROWS; idx++) {
         memset ((uint8_t *)baseaddr[idx], color, LORES_COLS);
-        //printf ("writing %d bytes (%x) into addr %p\n", 
-        //          LORES_COLS, color, baseaddr[idx]);
     }
-}
-
-int8_t keypress(void)
-{
-    uint8_t *kp = (uint8_t *)KEYPRESS_BUF_ADDR;
-    int8_t  c = kp[0];
-
-    // read the keyboard buffer
-    // and return 0 if no character is waiting
-    if(c < 128) {
-        return 0;
-    }
-    return c;
 }
 
 void lo_plot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
@@ -250,8 +230,6 @@ uint16_t analyze(uint16_t src[], uint16_t dst[])
             if (x=peek_pixel(src, row, col)) {
                 if ((n == 2) || (n == 3)) {
                     lo_plot(dst, row, col, 0xF);
-                    //printf ("%d,%d stays alive (res: %x, %d neighbors)\n", row, col, x, n);
-                    //wait_for_keypress(CH_ENTER);
                     total++;
                 }
                 else
@@ -260,8 +238,6 @@ uint16_t analyze(uint16_t src[], uint16_t dst[])
             else {
                 if (n == 3) {
                     lo_plot(dst, row, col, 0xF);
-                    //printf ("%d,%d stays alive (res: %x, %d neighbors)\n", row, col, x, n);
-                    //wait_for_keypress(CH_ENTER);
                     total++;
                 }
                 else
