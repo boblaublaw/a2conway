@@ -305,8 +305,6 @@ int main(void)
 
     gotoxy(0,LORES_ROWS);
     POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
-    printf("once more\n");
-    wait_for_keypress(CH_ENTER);
 
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
     lo_clear(page1, TGI_COLOR_BLACK);
