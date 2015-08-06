@@ -8,6 +8,7 @@
 SYS	= apple2enh
 
 CFLAGS = -Ori --codesize 500
+IMGNAME = A2CONWAY.DSK
 
 # test program starts at $6000 to not overwrite graphics pages
 LDFLAGS_a2conway_apple2enh=--start-addr 24576
@@ -74,6 +75,6 @@ clean:
 	$(RM) *~ *.map *.o *.s *.lbl ${EXELIST}
 
 dsk:	${EXELIST}
-	for x in $^; do AppleCommander.sh -d PROUSR.DSK $$x; done
-	for x in $^; do sh -c "AppleCommander.sh -cc65 PROUSR.DSK $$x BIN < $$x"; done
-	AppleCommander.sh -l PROUSR.DSK 
+	for x in $^; do AppleCommander.sh -d ${IMGNAME} $$x; done
+	for x in $^; do sh -c "AppleCommander.sh -cc65 ${IMGNAME} $$x BIN < $$x"; done
+	AppleCommander.sh -l ${IMGNAME} 
