@@ -7,8 +7,7 @@
  * measure baseline performance.
  */
 
-extern uint16_t page1[24];
-extern uint16_t page2[24];
+extern uint16_t gr_page[2][24];
 
 #define ROWABOVE(x) ( x == 0 ? (MAXROW -1)  : (x - 1))
 #define ROWBELOW(x) ( x == (MAXROW - 1) ? 0 : (x + 1))
@@ -89,9 +88,9 @@ void naive_engine(void)
     while (1) {
         if (process_keys())
             break;
-        naive_analyze(page1, page2);
+        naive_analyze(gr_page[0], gr_page[1]);
         softsw(SS_PAGE2ON);
-        naive_analyze(page2, page1);
+        naive_analyze(gr_page[1], gr_page[0]);
         softsw(SS_PAGE2OFF);
     }
 }

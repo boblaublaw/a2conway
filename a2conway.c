@@ -17,15 +17,15 @@
  * for lores graphics mode 40 x 48 x 16 colors 
  * we are using 40 x 40 x 16 
  */
-uint16_t page1[24]={
+uint16_t gr_page[2][24]={ {
+    // first page of lores graphics memory is 24 pairs of rows
     0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700, 0x0780,
     0x0428, 0x04A8, 0x0528, 0x05A8, 0x0628, 0x06A8, 0x0728, 0x07A8,
-    0x0450, 0x04D0, 0x0550, 0x05D0, 0x0650, 0x06D0, 0x0750, 0x07D0 };
-
-uint16_t page2[24]={
+    0x0450, 0x04D0, 0x0550, 0x05D0, 0x0650, 0x06D0, 0x0750, 0x07D0 }, {
+    // second page of lores graphics memory is also 24 pairs of rows
     0x0800, 0x0880, 0x0900, 0x0980, 0x0A00, 0x0A80, 0x0B00, 0x0B80,
     0x0828, 0x08A8, 0x0928, 0x09A8, 0x0A28, 0x0AA8, 0x0B28, 0x0BA8,
-    0x0850, 0x08D0, 0x0950, 0x09D0, 0x0A50, 0x0AD0, 0x0B50, 0x0BD0 };
+    0x0850, 0x08D0, 0x0950, 0x09D0, 0x0A50, 0x0AD0, 0x0B50, 0x0BD0 } };
 
 /*
  * FUNCTIONS:
@@ -96,7 +96,7 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     // suitable for seeding our PRNG
     uint16_t seed = PEEK(RSEED1) + PEEK(RSEED2) * 256;
     srand(seed);
-    lo_clear(page1, TGI_COLOR_BLACK);
+    lo_clear(gr_page[0], TGI_COLOR_BLACK);
 
     while (count--) {
         r = rand();
@@ -125,11 +125,11 @@ uint8_t process_keys(void)
         else if (c == 'q') 
             return 1;
         else if (c == 'r') 
-            randomize(page1, 400);
+            randomize(gr_page[0], 400);
         else if (c == 'g')
-            gospergun(page1);
+            gospergun(gr_page[0]);
         else if (c == 's')
-            simkins(page1);
+            simkins(gr_page[0]);
     }
     return 0;
 }
@@ -151,7 +151,7 @@ int main(void)
     POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
 
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
-    glider(page1);
+    glider(gr_page[0]);
 
     naive_engine();
     
