@@ -37,3 +37,19 @@ typedef char            int8_t;   // 1 byte
 #define TEXTWINDOW_TOP_EDGE     0x22
 #define RSEED1                  0x4E
 #define RSEED2                  0x4F
+
+void clearkeybuf(void);
+void wait_for_keypress(uint8_t key);
+void text_mode(void);
+void gr_mode(uint16_t page, uint16_t mode);
+void lo_clear(uint16_t baseaddr[], uint8_t color);
+void lo_plot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color);
+void glider(uint16_t page[]);
+void simkins(uint16_t page[]);
+void gospergun(uint16_t page[]);
+void randomize(uint16_t baseaddr[], uint16_t count);
+void run(void);
+uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col);
+uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);
+uint16_t analyze(uint16_t src[], uint16_t dst[]);
+int8_t keypress(void);
