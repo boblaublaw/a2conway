@@ -8,45 +8,7 @@
 #include <conio.h>      // kbhit, cgetc
 #include <peekpoke.h>   // POKE
 #include <apple2enh.h>  // CH_ENTER
-
-// typedefs
-typedef unsigned long   uint32_t; // 4 bytes
-typedef long            int32_t;  // 4 bytes
-typedef unsigned        uint16_t; // 2 bytes
-typedef int             int16_t;  // 2 bytes
-typedef unsigned char   uint8_t;  // 1 byte
-typedef char            int8_t;   // 1 byte
-
-// defines
-#define ROWRANDMASK             0x00FF
-#define COLRANDMASK             0xFF00
-
-#define MAXROWPAIR              20
-#define MAXROW                  ( MAXROWPAIR * 2 )
-#define MAXCOL                  40
-
-#define KEYPRESS_BUF_ADDR       0xC000
-#define KEYCLEAR_BUF_ADDR       0xC010
-
-#define SS_80COLOFF             0xC00C
-#define SS_80COLON              0xC00D
-
-#define SS_TEXTOFF              0xC050
-#define SS_TEXTON               0xC051
-#define SS_MIXEDOFF             0xC052
-#define SS_MIXEDON              0xC053
-#define SS_PAGE2OFF             0xC054
-#define SS_PAGE2ON              0xC055
-#define SS_HIRESOFF             0xC056
-#define SS_HIRESON              0xC057
-#define softsw(x)               POKE(x,0)
-
-#define LORES_PAGE1_BASE        0x400
-#define LORES_PAGE2_BASE        0x800
-
-#define TEXTWINDOW_TOP_EDGE     0x22
-#define RSEED1                  0x4E
-#define RSEED2                  0x4F
+#include "a2conway.h"   // prototypes
 
 // globals:
 /* the base addresses for the 48 scanline pairs */
@@ -106,7 +68,7 @@ uint16_t page2[24]={
     0x0B50,
     0x0BD0 };
 
-void clearkeybuf()
+void clearkeybuf(void)
 {
     /* return the last key press  */
     uint8_t *kp = (uint8_t*)KEYPRESS_BUF_ADDR;
@@ -172,12 +134,7 @@ void lo_clear(uint16_t baseaddr[], uint8_t color)
     }
 }
 
-void text_clear(uint16_t baseaddr[])
-{
-    lo_clear(baseaddr, ' ');
-}
-
-int8_t keypress()
+int8_t keypress(void)
 {
     uint8_t *kp = (uint8_t *)KEYPRESS_BUF_ADDR;
     int8_t  c = kp[0];
@@ -372,24 +329,6 @@ void run(void)
     uint16_t total;
     while (1) {
         analyze(page1, page2);
-#if 0
-        text_mode();
-        POKE(TEXTWINDOW_TOP_EDGE,0);
-        gotoxy(0,0);
-        i=0;
-        for (row=0; row < MAXROW; row++) {
-            for (col=0; col < MAXCOL; col++) {
-                if(stats[row][col]) {
-                    printf("%d,%d has %d neighbors\n", row,col,stats[row][col]);
-                    i+=1;
-                }
-                if (i % 10 == 0) {
-                    wait_for_keypress(CH_ENTER);
-                }
-            }
-        }
-        exit(0);
-#endif
         softsw(SS_PAGE2ON);
         total = analyze(page2, page1);
         if (total == 0) {
@@ -401,16 +340,20 @@ void run(void)
     }
 }
 
-int main()
+int main(void)
 {
     //memset(stats, 0, MAXROW * MAXCOL);
 
     // our program just uses the bottom 4 lines of the display
-    gotoxy(0,LORES_ROWS);
-    POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
-
     printf ("built at %s %s\npress enter to start\n",
         __DATE__, __TIME__);
+    wait_for_keypress(CH_ENTER);
+
+    //asm("JSR $FC58"); // APPLESOFT HOME: WHY DOESNT THIS WORK?
+
+    gotoxy(0,LORES_ROWS);
+    POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
+    printf("once more\n");
     wait_for_keypress(CH_ENTER);
 
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
@@ -428,6 +371,5 @@ int main()
     POKE(TEXTWINDOW_TOP_EDGE,0);
     softsw(SS_TEXTON);
     
-    __asm__ ("JSR $FC58"); /* APPLESOFT HOME */
     return EXIT_SUCCESS;
 }
