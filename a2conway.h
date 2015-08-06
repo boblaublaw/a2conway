@@ -53,6 +53,4 @@ void simkins(uint16_t page[]);
 void gospergun(uint16_t page[]);
 void randomize(uint16_t baseaddr[], uint16_t count);
 void run(void);
-uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col);
-uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);
-uint16_t naive_analyze(uint16_t src[], uint16_t dst[]);
+void naive_analyze(uint16_t src[], uint16_t dst[]);

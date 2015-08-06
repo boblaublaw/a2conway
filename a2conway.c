@@ -9,7 +9,8 @@
 #include <peekpoke.h>   // POKE
 #include "a2conway.h"   // prototypes
 
-/* GLOBALS:
+/*
+ * GLOBALS:
  *
  * the base addresses for the 48 scanline pairs 
  * though we only use the first 20 pairs 
@@ -26,6 +27,9 @@ uint16_t page2[24]={
     0x0828, 0x08A8, 0x0928, 0x09A8, 0x0A28, 0x0AA8, 0x0B28, 0x0BA8,
     0x0850, 0x08D0, 0x0950, 0x09D0, 0x0A50, 0x0AD0, 0x0B50, 0x0BD0 };
 
+/*
+ * FUNCTIONS:
+ */
 void wait_for_keypress(uint8_t key)
 {
     uint8_t c;
