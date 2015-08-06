@@ -7,4 +7,5 @@ dependencies:
 
 # Instructions
 This repo contains a PROUSR.DSK file which can be booted in emulators or transferred to a 140k 5.25" floppy disk.
-After booting PROUSR.DSK, type "-a2conway" to launch the binary.
+
+Upon booting this dsk, a BASIC program called STARTUP will automatically run "A2CONWAY".
