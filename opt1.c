@@ -35,44 +35,51 @@ uint16_t page2below[24]={
 void opt1_engine(void)
 {
     uint8_t row, col, n, alive;
-    uint16_t *src, *dst;
+    uint8_t *rowptr;
+
     while (1) {
         if (process_keys())
             break;
 
         for (row=0; row < MAXROW; row++) {   
+            rowptr = page1[row];
             for (col=0; col < MAXCOL; col++) {
                 // work page 1 to page 2
+                alive = 0;
+                n = 0;
                 if (alive) {
                     if ((n == 2) || (n == 3))
-                        lo_plot(dst, row, col, 0xF);
+                        lo_plot(page2, row, col, 0xF);
                     else
-                        lo_plot(dst, row, col, 0x0);
+                        lo_plot(page2, row, col, 0x0);
                 }
                 else {
                     if (n == 3)
-                        lo_plot(dst, row, col, 0xF);
+                        lo_plot(page2, row, col, 0xF);
                     else
-                        lo_plot(dst, row, col, 0x0);
+                        lo_plot(page2, row, col, 0x0);
                 }
             }
         }
         softsw(SS_PAGE2ON);
 
         for (row=0; row < MAXROW; row++) {   
+            rowptr = page2[row];
             for (col=0; col < MAXCOL; col++) {
                 // work page 2 to page 1
+                alive = 0;
+                n = 0;
                 if (alive) {
                     if ((n == 2) || (n == 3))
-                        lo_plot(src, row, col, 0xF);
+                        lo_plot(page1, row, col, 0xF);
                     else
-                        lo_plot(src, row, col, 0x0);
+                        lo_plot(page1, row, col, 0x0);
                 }
                 else {
                     if (n == 3)
-                        lo_plot(src, row, col, 0xF);
+                        lo_plot(page1, row, col, 0xF);
                     else
-                        lo_plot(src, row, col, 0x0);
+                        lo_plot(page1, row, col, 0x0);
                 }
             }
         }
