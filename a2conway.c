@@ -15,7 +15,6 @@
 /* though we only use the first 20 pairs */
 /* for lores graphics mode 40 x 48 x 16 colors */
 /* we are using 40 x 40 x 16 */
-//uint8_t stats[MAXROW][MAXCOL];
 uint16_t page1[24]={
     0x0400, // triad 0
     0x0480,
@@ -248,7 +247,6 @@ uint16_t analyze(uint16_t src[], uint16_t dst[])
     for (row=0; row < MAXROW; row++) {
         for (col=0; col < MAXCOL; col++) {
             n = count_neighbors(src, row, col);
-            //stats[row][col]=n;
             if (x=peek_pixel(src, row, col)) {
                 if ((n == 2) || (n == 3)) {
                     lo_plot(dst, row, col, 0xF);
@@ -274,27 +272,10 @@ uint16_t analyze(uint16_t src[], uint16_t dst[])
     return total;
 }
 
-void run(void) 
-{
-    //uint8_t row,col,i;
-    uint16_t total;
-    while (1) {
-        analyze(page1, page2);
-        softsw(SS_PAGE2ON);
-        total = analyze(page2, page1);
-        if (total == 0) {
-            //randomize(page1, 400);
-            //gospergun(page1);
-            //glider(page1);
-            simkins(page1);
-        }
-        softsw(SS_PAGE2OFF);
-    }
-}
 
 int main(void)
 {
-    //memset(stats, 0, MAXROW * MAXCOL);
+    uint8_t c;
 
     // our program just uses the bottom 4 lines of the display
     printf ("built at %s %s\npress enter to start\n",
@@ -315,7 +296,33 @@ int main(void)
     simkins(page1);
     //glider(page1);
 
-    run();
+    while (1) {
+        if (kbhit() > 0) {
+            c=cgetc();
+            clearkeybuf();
+            if (c == 'p') {
+                printf("PAUSED. Press Enter to Continue.\n");
+                wait_for_keypress(CH_ENTER);
+                continue;
+            }
+            if (c == 'q') 
+                break;
+            // every choice after this point requires clearing
+            lo_clear(page1, TGI_COLOR_BLACK);
+            if (c == 'r') 
+                randomize(page1, 400);
+            else if (c == 'g')
+                gospergun(page1);
+            else if (c == 's')
+                simkins(page1);
+            else
+                printf("ignoring keypress %c(%d)\n", c, c);
+        }
+        analyze(page1, page2);
+        softsw(SS_PAGE2ON);
+        analyze(page2, page1);
+        softsw(SS_PAGE2OFF);
+    }
     
     printf ("all done! press enter to end\n");
     wait_for_keypress(CH_ENTER);
