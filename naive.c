@@ -1,4 +1,5 @@
 #include "a2conway.h"
+#include <peekpoke.h>   // POKE
 
 /*
  * This is the totally unoptimized implementation of Conway's
@@ -6,8 +7,8 @@
  * measure baseline performance.
  */
 
-uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col);
-uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);
+extern uint16_t page1[24];
+extern uint16_t page2[24];
 
 #define ROWABOVE(x) ( x == 0 ? (MAXROW -1)  : (x - 1))
 #define ROWBELOW(x) ( x == (MAXROW - 1) ? 0 : (x + 1))
@@ -81,4 +82,16 @@ void naive_analyze(uint16_t src[], uint16_t dst[])
         }
     }
     return;
+}
+
+void naive_engine(void)
+{
+    while (1) {
+        if (process_keys())
+            break;
+        naive_analyze(page1, page2);
+        softsw(SS_PAGE2ON);
+        naive_analyze(page2, page1);
+        softsw(SS_PAGE2OFF);
+    }
 }

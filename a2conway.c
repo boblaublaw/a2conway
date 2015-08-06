@@ -110,10 +110,32 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     }
 }
 
-int main(void)
+uint8_t process_keys(void) 
 {
     uint8_t c;
 
+    if (kbhit() > 0) {
+        c=cgetc();
+        CLEARKEYBUF;
+
+        if (c == 'p') {
+            printf("PAUSED. Press Enter to Continue.\n");
+            wait_for_keypress(CH_ENTER);
+        }
+        else if (c == 'q') 
+            return 1;
+        else if (c == 'r') 
+            randomize(page1, 400);
+        else if (c == 'g')
+            gospergun(page1);
+        else if (c == 's')
+            simkins(page1);
+    }
+    return 0;
+}
+
+int main(void)
+{
     // our program just uses the bottom 4 lines of the display
     printf("built at %s %s\n", __DATE__, __TIME__);
     printf("\nHotkeys:\n");
@@ -131,30 +153,7 @@ int main(void)
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
     glider(page1);
 
-    while (1) {
-        if (kbhit() > 0) {
-            c=cgetc();
-            CLEARKEYBUF;
-
-            if (c == 'p') {
-                printf("PAUSED. Press Enter to Continue.\n");
-                wait_for_keypress(CH_ENTER);
-                continue;
-            }
-            else if (c == 'q') 
-                break;
-            else if (c == 'r') 
-                randomize(page1, 400);
-            else if (c == 'g')
-                gospergun(page1);
-            else if (c == 's')
-                simkins(page1);
-        }
-        naive_analyze(page1, page2);
-        softsw(SS_PAGE2ON);
-        naive_analyze(page2, page1);
-        softsw(SS_PAGE2OFF);
-    }
+    naive_engine();
     
     printf ("all done! press enter to end\n");
     wait_for_keypress(CH_ENTER);

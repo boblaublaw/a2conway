@@ -1,3 +1,4 @@
+#include <apple2enh.h>          // CH_ENTER, TGI_*
 #include "a2conway.h"
 
 /*

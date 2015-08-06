@@ -1,5 +1,3 @@
-#include <apple2enh.h>          // CH_ENTER, TGI_*
-
 // typedefs
 typedef unsigned long   uint32_t; // 4 bytes
 typedef long            int32_t;  // 4 bytes
@@ -52,5 +50,5 @@ void glider(uint16_t page[]);
 void simkins(uint16_t page[]);
 void gospergun(uint16_t page[]);
 void randomize(uint16_t baseaddr[], uint16_t count);
-void run(void);
-void naive_analyze(uint16_t src[], uint16_t dst[]);
+void naive_engine(void);
+uint8_t process_keys(void);
