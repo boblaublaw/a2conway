@@ -32,39 +32,50 @@ uint16_t page2below[24]={
     0x08D0, 0x0950, 0x09D0, 0x0A50, 0x0AD0, 0x0B50, 0x0BD0, 0x0800 };
 
 
-void opt1_analyze(uint16_t src[], uint16_t dst[])
-{
-    uint8_t row, col, n, alive;
-
-    for (row=0; row < MAXROW; row++) {   
-        for (col=0; col < MAXCOL; col++) {
-            
-
-            if (alive) {
-                if ((n == 2) || (n == 3))
-                    lo_plot(dst, row, col, 0xF);
-                else
-                    lo_plot(dst, row, col, 0x0);
-            }
-            else {
-                if (n == 3)
-                    lo_plot(dst, row, col, 0xF);
-                else
-                    lo_plot(dst, row, col, 0x0);
-            }
-        }
-    }
-    return;
-}
-
 void opt1_engine(void)
 {
+    uint8_t row, col, n, alive;
+    uint16_t *src, *dst;
     while (1) {
         if (process_keys())
             break;
-        opt1_analyze(page1, page2);
+
+        for (row=0; row < MAXROW; row++) {   
+            for (col=0; col < MAXCOL; col++) {
+                // work page 1 to page 2
+                if (alive) {
+                    if ((n == 2) || (n == 3))
+                        lo_plot(dst, row, col, 0xF);
+                    else
+                        lo_plot(dst, row, col, 0x0);
+                }
+                else {
+                    if (n == 3)
+                        lo_plot(dst, row, col, 0xF);
+                    else
+                        lo_plot(dst, row, col, 0x0);
+                }
+            }
+        }
         softsw(SS_PAGE2ON);
-        opt1_analyze(page2, page1);
+
+        for (row=0; row < MAXROW; row++) {   
+            for (col=0; col < MAXCOL; col++) {
+                // work page 2 to page 1
+                if (alive) {
+                    if ((n == 2) || (n == 3))
+                        lo_plot(src, row, col, 0xF);
+                    else
+                        lo_plot(src, row, col, 0x0);
+                }
+                else {
+                    if (n == 3)
+                        lo_plot(src, row, col, 0xF);
+                    else
+                        lo_plot(src, row, col, 0x0);
+                }
+            }
+        }
         softsw(SS_PAGE2OFF);
     }
 }
