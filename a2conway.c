@@ -254,8 +254,14 @@ int main(void)
     uint8_t c;
 
     // our program just uses the bottom 4 lines of the display
-    printf ("built at %s %s\npress enter to start\n",
-        __DATE__, __TIME__);
+    printf("built at %s %s\n", __DATE__, __TIME__);
+    printf("\nHotkeys:\n");
+    printf("\tr: randomize\n");
+    printf("\tg: gosper glider gun\n");
+    printf("\ts: simkins glider gun\n");
+    printf("\tp: pause\n");
+    printf("\tq: quit\n");
+    printf("press enter to start\n");
     wait_for_keypress(CH_ENTER);
 
     //asm("JSR $FC58"); // APPLESOFT HOME: WHY DOESNT THIS WORK?
@@ -266,11 +272,7 @@ int main(void)
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
     lo_clear(page1, TGI_COLOR_BLACK);
     
-    // randomly create critters
-    //randomize(page1, 400);
-    //gospergun(page1);
-    simkins(page1);
-    //glider(page1);
+    glider(page1);
 
     while (1) {
         if (kbhit() > 0) {
@@ -292,7 +294,7 @@ int main(void)
             else if (c == 's')
                 simkins(page1);
             else
-                printf("ignoring keypress %c(%d)\n", c, c);
+                printf("ignoring keypress %d\n", c);
         }
         analyze(page1, page2);
         softsw(SS_PAGE2ON);
