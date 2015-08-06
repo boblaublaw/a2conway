@@ -104,7 +104,7 @@ void randomize(uint16_t baseaddr[], uint16_t count)
         row = r & ROWRANDMASK;
         col = (r & COLRANDMASK) >> 8;
         row %= MAXROW;
-        col %= 40;
+        col %= MAXCOL;
         //printf("turning on %d,%d with %04x\n", row, col, r);
         lo_plot(baseaddr, row, col, 0xf);
     }
