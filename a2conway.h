@@ -7,12 +7,21 @@ typedef unsigned char   uint8_t;  // 1 byte
 typedef char            int8_t;   // 1 byte
 
 // defines
+//
+//#define MIXED_MODE              1
+
 #define ROWRANDMASK             0x00FF
 #define COLRANDMASK             0xFF00
 
+#ifdef MIXED_MODE
 #define MAXROWPAIRCNT           20
+#else
+#define MAXROWPAIRCNT           24
+#endif
+
 #define MAXROWCNT               (MAXROWPAIRCNT * 2)
 #define MAXCOLCNT               40
+
 #define MAXROWIDX               (MAXROWCNT - 1)
 #define MAXROWPAIRIDX           (MAXROWPAIRCNT - 1)
 #define MAXCOLIDX               (MAXCOLCNT - 1)
@@ -39,9 +48,6 @@ typedef char            int8_t;   // 1 byte
 #define TEXTWINDOW_TOP_EDGE     0x22
 #define RSEED1                  0x4E
 #define RSEED2                  0x4F
-
-#define LORES_COLS              40
-#define LORES_ROWS              20
 
 #define CLEARKEYBUF             while((PEEK(KEYPRESS_BUF_ADDR)) > 127) POKE(KEYCLEAR_BUF_ADDR, 0)
 #define EVEN_ROW_MASK           0x0F

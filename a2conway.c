@@ -72,8 +72,8 @@ void lo_clear(uint16_t baseaddr[], uint8_t color)
         color = (color << 4) | color;
     }
     // write this value into every memory address:
-    for (idx = 0; idx < LORES_ROWS; idx++) {
-        memset ((uint8_t *)baseaddr[idx], color, LORES_COLS);
+    for (idx = 0; idx < MAXROWPAIRCNT; idx++) {
+        memset ((uint8_t *)baseaddr[idx], color, MAXCOLCNT);
     }
 }
 
@@ -151,10 +151,13 @@ int main(void)
     printf("press enter to start\n");
     wait_for_keypress(CH_ENTER);
 
-    gotoxy(0,LORES_ROWS);
-    POKE(TEXTWINDOW_TOP_EDGE,LORES_ROWS);
-
+#ifdef MIXED_MODE
+    gotoxy(0,MAXROWPAIRCNT);
+    POKE(TEXTWINDOW_TOP_EDGE,MAXROWPAIRCNT);
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
+#else
+    gr_mode(SS_PAGE2OFF, SS_MIXEDOFF);
+#endif
     glider(gr_page[0]);
 
     if (engine == 0)
