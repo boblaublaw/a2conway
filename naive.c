@@ -9,22 +9,11 @@
 
 extern uint16_t gr_page[2][24];
 
-#define ROWABOVE(x) ( x == 0 ? (MAXROW -1)  : (x - 1))
-#define ROWBELOW(x) ( x == (MAXROW - 1) ? 0 : (x + 1))
-#define COLLEFT(y)  ( y == 0 ? (MAXCOL -1)  : (y - 1))
-#define COLRIGHT(y) ( y == (MAXCOL - 1) ? 0 : (y + 1))
-
 uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
-    uint8_t val;
     uint8_t *rowptr = baseaddr[ row / 2 ];
 
-    if (row & 0x1)  
-        val = rowptr[col] & 0xF0;
-    else
-        val = rowptr[col] & 0x0F;
-
-    if (val)
+    if (rowptr[col] & MASK_BY_ROW(row))
         return 1;
     return 0;
 }
@@ -63,8 +52,8 @@ void naive_analyze(uint16_t src[], uint16_t dst[])
 {
     uint8_t row, col, n;
 
-    for (row=0; row < MAXROW; row++) {   
-        for (col=0; col < MAXCOL; col++) {
+    for (row=0; row < MAXROWCNT; row++) {   
+        for (col=0; col < MAXCOLCNT; col++) {
             n = count_neighbors(src, row, col);
             if (peek_pixel(src, row, col)) {
                 if ((n == 2) || (n == 3))

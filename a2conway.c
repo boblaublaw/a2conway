@@ -32,14 +32,17 @@ uint16_t gr_page[2][24]={ {
  */
 void wait_for_keypress(uint8_t key)
 {
+    uint8_t c;
     CLEARKEYBUF;
     for (;;) {
         if (kbhit() > 0) {
-            if (key == cgetc())
+            if (key == (c = cgetc()))
             {
                 CLEARKEYBUF;
                 return;
             }
+            if (c == 'q')
+                exit(EXIT_SUCCESS);
             CLEARKEYBUF;
         }
     }
@@ -103,8 +106,8 @@ void randomize(uint16_t baseaddr[], uint16_t count)
         // use the high bit to determine which nibble we turn on
         row = r & ROWRANDMASK;
         col = (r & COLRANDMASK) >> 8;
-        row %= MAXROW;
-        col %= MAXCOL;
+        row %= MAXROWCNT;
+        col %= MAXCOLCNT;
         //printf("turning on %d,%d with %04x\n", row, col, r);
         lo_plot(baseaddr, row, col, 0xf);
     }
@@ -136,6 +139,7 @@ uint8_t process_keys(void)
 
 int main(void)
 {
+    uint8_t engine = 1;
     // our program just uses the bottom 4 lines of the display
     printf("built at %s %s\n", __DATE__, __TIME__);
     printf("\nHotkeys:\n");
@@ -153,7 +157,10 @@ int main(void)
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
     glider(gr_page[0]);
 
-    naive_engine();
+    if (engine == 1)
+        naive_engine();
+    else
+        opt1_engine();
     
     printf ("all done! press enter to end\n");
     wait_for_keypress(CH_ENTER);

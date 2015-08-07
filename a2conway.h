@@ -10,9 +10,12 @@ typedef char            int8_t;   // 1 byte
 #define ROWRANDMASK             0x00FF
 #define COLRANDMASK             0xFF00
 
-#define MAXROWPAIR              20
-#define MAXROW                  ( MAXROWPAIR * 2 )
-#define MAXCOL                  40
+#define MAXROWPAIRCNT           20
+#define MAXROWCNT               (MAXROWPAIRCNT * 2)
+#define MAXCOLCNT               40
+#define MAXROWIDX               (MAXROWCNT - 1)
+#define MAXROWPAIRIDX           (MAXROWPAIRCNT - 1)
+#define MAXCOLIDX               (MAXCOLCNT - 1)
 
 #define KEYPRESS_BUF_ADDR       0xC000
 #define KEYCLEAR_BUF_ADDR       0xC010
@@ -41,6 +44,12 @@ typedef char            int8_t;   // 1 byte
 #define LORES_ROWS              20
 
 #define CLEARKEYBUF             while((PEEK(KEYPRESS_BUF_ADDR)) > 127) POKE(KEYCLEAR_BUF_ADDR, 0)
+#define MASK_BY_ROW(x)          (((x) & 0x1) ? 0xF0: 0x0F)
+
+#define ROWABOVE(x) ( x == 0 ? MAXROWIDX  : (x - 1))
+#define ROWBELOW(x) ( x == MAXROWIDX ? 0 : (x + 1))
+#define COLLEFT(y)  ( y == 0 ? MAXCOLIDX  : (y - 1))
+#define COLRIGHT(y) ( y == MAXCOLIDX ? 0 : (y + 1))
 
 void text_mode(void);
 void gr_mode(uint16_t page, uint16_t mode);
@@ -52,3 +61,7 @@ void gospergun(uint16_t page[]);
 void randomize(uint16_t baseaddr[], uint16_t count);
 void naive_engine(void);
 uint8_t process_keys(void);
+void opt1_engine(void);
+void wait_for_keypress(uint8_t key);
+uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col);
+uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);

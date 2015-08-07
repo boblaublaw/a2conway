@@ -1,4 +1,6 @@
 #include <peekpoke.h>           // POKE
+#include <stdio.h>              // printf
+#include <apple2enh.h>          // CH_ENTER
 #include "a2conway.h"
 
 /*
@@ -29,56 +31,145 @@ uint16_t pagebelow[2][24]={ {
 
 void opt1_engine(void)
 {
-    uint8_t row, col, n, alive;
-    uint8_t *rowptr;
+    uint8_t src, dst, row, col, n, alive, mask;
+    uint8_t *rowptr, *aboveptr, *belowptr;
+    uint16_t *srcpage, *dstpage;
 
     while (1) {
         if (process_keys())
             break;
+        for (src=0; src < 2; src++) {
+            dst = !src;
+            printf("src page: %d dst page: %d\n", src,dst);
+            srcpage=gr_page[src];
+            dstpage=dstpage;
 
-        for (row=0; row < MAXROW; row++) {   
-            rowptr = gr_page[0][row];
-            for (col=0; col < MAXCOL; col++) {
-                // work page 1 to page 2
-                alive = 0;
-                n = 0;
-                if (alive) {
-                    if ((n == 2) || (n == 3))
-                        lo_plot(gr_page[1], row, col, 0xF);
-                    else
-                        lo_plot(gr_page[1], row, col, 0x0);
-                }
-                else {
-                    if (n == 3)
-                        lo_plot(gr_page[1], row, col, 0xF);
-                    else
-                        lo_plot(gr_page[1], row, col, 0x0);
-                }
-            }
-        }
-        softsw(SS_PAGE2ON);
+            for (row=0; row < MAXROWCNT; row++) {   
 
-        for (row=0; row < MAXROW; row++) {   
-            rowptr = gr_page[1][row];
-            for (col=0; col < MAXCOL; col++) {
-                // work page 2 to page 1
-                alive = 0;
-                n = 0;
-                if (alive) {
-                    if ((n == 2) || (n == 3))
-                        lo_plot(gr_page[0], row, col, 0xF);
-                    else
-                        lo_plot(gr_page[0], row, col, 0x0);
+                aboveptr = pageabove[src][row/2];
+                rowptr = srcpage[row/2];
+                belowptr = pagebelow[src][row/2];
+
+                mask = ((row % 2) ? 0xF0 :  0x0F);
+
+                printf ("rowswitch: %d mask %x\n", (row % 2), mask);
+                // logic for first column:
+                col = 0;
+                alive = rowptr[0] & mask;
+            
+                n = (aboveptr[MAXCOLIDX] & mask)    ? 1 : 0 + \
+                    (aboveptr[0] & mask)            ? 1 : 0 + \
+                    (aboveptr[1] & mask)            ? 1 : 0 + \
+                    (rowptr[MAXCOLIDX] & mask)      ? 1 : 0 + \
+                    (rowptr[1] & mask)              ? 1 : 0 + \
+                    (belowptr[MAXCOLIDX] & mask)    ? 1 : 0 + \
+                    (belowptr[0] & mask)            ? 1 : 0 + \
+                    (belowptr[1] & mask)            ? 1 : 0;
+
+                if (count_neighbors(srcpage, row, col) != n) {
+                    printf ("alg fail: %d, %d: right: %d wrong: %d\n", row, col, count_neighbors(srcpage, row, col), n);
+                    //printf("above: %p, self %p, below %p\n", aboveptr, rowptr, belowptr);
+                    wait_for_keypress(CH_ENTER);
+
+                    if (peek_pixel(srcpage, ROWABOVE(row), COLLEFT(col)) != ((aboveptr[MAXCOLIDX] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: above left (%d, %d) alive: r%d w%d\n", row, col, row - 1, MAXCOLIDX, peek_pixel(srcpage, ROWABOVE(row), COLLEFT(col)), ((aboveptr[MAXCOLIDX] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    if (peek_pixel(srcpage, ROWABOVE(row), col) != ((aboveptr[col] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: above (%d, %d) alive: r%d w%d\n", row, col, ROWABOVE(row), col, peek_pixel(srcpage, ROWABOVE(row), col), ((aboveptr[col] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    if (peek_pixel(srcpage, ROWABOVE(row), COLRIGHT(col)) != ((aboveptr[col + 1] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: above right (%d, %d) alive: r%d w%d\n", row, col, ROWABOVE(row), COLRIGHT(col), peek_pixel(srcpage, ROWABOVE(row), COLRIGHT(col)), ((aboveptr[col + 1] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    if (peek_pixel(srcpage, row, COLLEFT(col)) != ((rowptr[MAXCOLIDX] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: left (%d, %d) alive: r%d w%d\n", row, col, row, COLLEFT(col), peek_pixel(srcpage, row, COLLEFT(col)), ((rowptr[MAXCOLIDX] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    if (peek_pixel(srcpage, row, COLRIGHT(col)) != ((rowptr[col + 1] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: right (%d, %d) alive: r%d w%d\n", row, col, row, COLRIGHT(col), peek_pixel(srcpage, row, COLRIGHT(col)), ((rowptr[col + 1] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    if (peek_pixel(srcpage, ROWBELOW(row), COLLEFT(col)) != ((belowptr[MAXCOLIDX] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: below left (%d, %d) alive: r%d w%d\n", row, col, ROWBELOW(row), COLLEFT(col),peek_pixel(srcpage, ROWBELOW(row), COLLEFT(col)), ((belowptr[MAXCOLIDX] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    if (peek_pixel(srcpage, ROWBELOW(row), col) != ((belowptr[col] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: below (%d, %d) alive: r%d w%d\n", row, col, ROWBELOW(row), col,peek_pixel(srcpage, ROWBELOW(row), col), ((belowptr[col] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    if (peek_pixel(srcpage, ROWBELOW(row), COLRIGHT(col)) != ((belowptr[col+1] & mask) ? 1 : 0 )) {
+                        printf ("disagree %d, %d: below right (%d, %d) alive: r%d w%d\n", row, col, ROWBELOW(row), COLRIGHT(col),peek_pixel(srcpage, ROWBELOW(row), COLRIGHT(col)),((belowptr[col+1] & mask) ? 1 : 0 ));
+                        wait_for_keypress(CH_ENTER);
+                    }
                 }
-                else {
-                    if (n == 3)
-                        lo_plot(gr_page[0], row, col, 0xF);
-                    else
-                        lo_plot(gr_page[0], row, col, 0x0);
+#if 0
+                if (alive || n) {
+                    printf ("cell %d, %d is %s\n", row, 0, (alive ? "alive" : "dead"));
+                    printf ("cell %d, %d has %d neighbors\n", row, 0, n);
+                    printf ("assigning value %x\n", ((alive && ((n == 2) || (n == 3)) || (!alive && (n == 3))) ? 0xF : 0x0));
+                    wait_for_keypress(CH_ENTER);
                 }
+#endif
+                lo_plot(dstpage, row, 0, ((alive && ((n == 2) || (n == 3)) || (!alive && (n == 3))) ? 0xF : 0x0));
+#if 0
+                // logic for col 1 through 38:
+                for (col=1; col < MAXCOLCNT - 1; col++) {
+                    alive = rowptr[col] & mask;
+                    n = (aboveptr[col - 1] & mask) ? 1 : 0 + \
+                        (aboveptr[col] & mask) ? 1 : 0 + \
+                        (aboveptr[col + 1] & mask) ? 1 : 0 + \
+                        (rowptr[col - 1] & mask) ? 1 : 0 + \
+                        (rowptr[col + 1] & mask) ? 1 : 0 + \
+                        (aboveptr[col - 1] & mask) ? 1 : 0 + \
+                        (aboveptr[col] & mask) ? 1 : 0 + \
+                        (aboveptr[col + 1] & mask) ? 1 : 0;
+#if 0
+                    if (alive || n) {
+                        printf ("cell %d, %d is %s\n", row, col, (alive ? "alive" : "dead"));
+                        printf ("cell %d, %d has %d neighbors\n", row, col, n);
+                        printf ("assigning value %x\n", ((alive && ((n == 2) || (n == 3)) || (!alive && (n == 3))) ? 0xF : 0x0));
+                    }
+#endif
+                    if (count_neighbors(srcpage, row, col) != n) {
+                        printf ("alg fail: %d, %d: right: %d wrong: %d\n", row, col, count_neighbors(srcpage, row, col), n);
+                        wait_for_keypress(CH_ENTER);
+                    }
+                    lo_plot(dstpage, row, col, ((alive && ((n == 2) || (n == 3)) || (!alive && (n == 3))) ? 0xF : 0x0));
+                }
+
+                // logic for the last column:
+                col = MAXCOLIDX;
+                alive = rowptr[MAXCOLIDX] & mask;
+                n = (aboveptr[MAXCOLIDX - 1] & mask) ? 1 : 0 + \
+                    (aboveptr[MAXCOLIDX] & mask) ? 1 : 0 + \
+                    (aboveptr[0] & mask) ? 1 : 0 + \
+                    (rowptr[MAXCOLIDX - 1] & mask) ? 1 : 0 + \
+                    (rowptr[0] & mask) ? 1 : 0 + \
+                    (belowptr[MAXCOLIDX - 1] & mask) ? 1 : 0 + \
+                    (belowptr[MAXCOLIDX] & mask) ? 1 : 0 + \
+                    (belowptr[0] & mask) ? 1 : 0;
+                if (count_neighbors(srcpage, row, col) != n) {
+                    printf ("alg fail: %d, %d: right: %d wrong: %d\n", row, col, count_neighbors(srcpage, row, col), n);
+                    wait_for_keypress(CH_ENTER);
+                }
+#if 0
+                if (alive || n) { 
+                    printf ("cell %d, %d is %s\n", row, MAXCOLIDX, (alive ? "alive" : "dead"));
+                    printf ("cell %d, %d has %d neighbors\n", row, MAXCOLIDX, n);
+                    printf ("assigning value %x\n", ((alive && ((n == 2) || (n == 3)) || (!alive && (n == 3))) ? 0xF : 0x0));
+                    wait_for_keypress(CH_ENTER);
+                }
+#endif
+                lo_plot(dstpage, row, MAXCOLIDX, ((alive && ((n == 2) || (n == 3)) || (!alive && (n == 3))) ? 0xF : 0x0));
+#endif
+
             }
+            // after drawing, switch the page
+            //wait_for_keypress(CH_ENTER);
+            softsw(dst + SS_PAGE2OFF);
         }
-        softsw(SS_PAGE2OFF);
     }
 }
 
