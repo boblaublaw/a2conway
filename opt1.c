@@ -44,16 +44,16 @@ uint16_t pagebelow[2][24]={ {
 #endif
 
 
-uint8_t opt1_engine(void)
+void opt1_engine(void)
 {
     uint8_t src, dst, col, result, rowpair;
-    uint8_t res, A, B, A1, A2, A3, A4, A5, A6, A7, A8, A9, B1, B2, B3;
+    uint8_t A, B, A1, A2, A3, A4, A5, A6, A7, A8, A9, B1, B2, B3;
     uint8_t *dstptr, *rowptr, *aboveptr, *belowptr;
     uint16_t *srcpage, *dstpage, *belowsrc, *abovesrc;
 
     while (1) {
-        if (res = process_keys())
-            return res;
+        if (process_keys())
+            break;
         for (src=0; src < 2; src++) {
             dst = !src;
             //printf("src page: %d dst page: %d\n", src,dst);

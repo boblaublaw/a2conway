@@ -9,6 +9,12 @@ typedef char            int8_t;   // 1 byte
 // defines
 //#define MIXED_MODE              1
 
+#define ENGINE_STOP             0
+#define ENGINE_RUN              1
+
+#define ENGINE_SEL_NAIVE        1
+#define ENGINE_SEL_OPT1         2
+
 #define ROWRANDMASK             0x00FF
 #define COLRANDMASK             0xFF00
 
@@ -66,10 +72,9 @@ void glider(uint16_t page[]);
 void simkins(uint16_t page[]);
 void gospergun(uint16_t page[]);
 void randomize(uint16_t baseaddr[], uint16_t count);
-uint8_t naive_engine(void);
+void naive_engine(void);
 uint8_t process_keys(void);
-uint8_t opt1_engine(void);
+void opt1_engine(void);
 void wait_for_keypress(uint8_t key);
 uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col);
-//#define peek_pixel(base, r, c) ((((uint8_t *)base[(r)/2])[(c)]) & MASK_BY_ROW(r) ? 1 : 0  )
 uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);

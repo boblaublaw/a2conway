@@ -17,7 +17,7 @@
  * for lores graphics mode 40 x 48 x 16 colors 
  * we are using 40 x 40 x 16 
  */
-uint8_t engine;
+uint8_t engine_sel, engine_state;
 
 uint16_t gr_page[2][24]={ {
     // first page of lores graphics memory is 24 pairs of rows
@@ -127,16 +127,20 @@ uint8_t process_keys(void)
             printf("PAUSED. Press Enter to Continue.\n");
             wait_for_keypress(CH_ENTER);
         }
-        else if (c == '0') {
-            engine=0;
-            return 2;
-        }
         else if (c == '1') {
-            engine=1;
-            return 2;
-        }
-        else if (c == 'q') 
+            engine_sel=ENGINE_SEL_NAIVE;
+            engine_state=ENGINE_RUN;
             return 1;
+        }
+        else if (c == '2') {
+            engine_sel=ENGINE_SEL_OPT1;
+            engine_state=ENGINE_RUN;
+            return 1;
+        }
+        else if (c == 'q') {
+            engine_state=ENGINE_STOP;
+            return 1;
+        }
         else if (c == 'r') 
             randomize(gr_page[0], 400);
         else if (c == 'g')
@@ -149,7 +153,8 @@ uint8_t process_keys(void)
 
 int main(void)
 {
-    engine = 1;
+    engine_sel = ENGINE_SEL_OPT1;
+    engine_state = ENGINE_RUN;
     // our program just uses the bottom 4 lines of the display
     printf("built at %s %s\n", __DATE__, __TIME__);
     printf("\nHotkeys:\n");
@@ -157,6 +162,8 @@ int main(void)
     printf("\tg: gosper glider gun\n");
     printf("\ts: simkins glider gun\n");
     printf("\tp: pause\n");
+    printf("\t1: switch to naive engine\n");
+    printf("\t2: switch to optimized engine\n");
     printf("\tq: quit\n");
     printf("press enter to start\n");
     wait_for_keypress(CH_ENTER);
@@ -170,14 +177,13 @@ int main(void)
 #endif
     glider(gr_page[0]);
 
-
-    if (engine == 0)
-        naive_engine();
-    else
-        opt1_engine();
+    while (engine_state == ENGINE_RUN) {
+        if (engine_sel == ENGINE_SEL_NAIVE)
+            naive_engine();
+        else
+            opt1_engine();
+    }
     
-    printf ("all done! press enter to end\n");
-    wait_for_keypress(CH_ENTER);
     POKE(TEXTWINDOW_TOP_EDGE,0);
     softsw(SS_TEXTON);
     
