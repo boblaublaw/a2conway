@@ -157,7 +157,7 @@ int main(void)
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);
     glider(gr_page[0]);
 
-    if (engine == 1)
+    if (engine == 0)
         naive_engine();
     else
         opt1_engine();
