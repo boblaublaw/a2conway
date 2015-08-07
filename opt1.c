@@ -44,16 +44,16 @@ uint16_t pagebelow[2][24]={ {
 #endif
 
 
-void opt1_engine(void)
+uint8_t opt1_engine(void)
 {
-    uint8_t src, dst, row, col, n, alive, mask, result, rowpair;
-    uint8_t A, B, A1, A2, A3, A4, A5, A6, A7, A8, A9, B1, B2, B3;
+    uint8_t src, dst, col, result, rowpair;
+    uint8_t res, A, B, A1, A2, A3, A4, A5, A6, A7, A8, A9, B1, B2, B3;
     uint8_t *dstptr, *rowptr, *aboveptr, *belowptr;
     uint16_t *srcpage, *dstpage, *belowsrc, *abovesrc;
 
     while (1) {
-        if (process_keys())
-            break;
+        if (res = process_keys())
+            return res;
         for (src=0; src < 2; src++) {
             dst = !src;
             //printf("src page: %d dst page: %d\n", src,dst);
@@ -67,55 +67,67 @@ void opt1_engine(void)
                 rowptr = srcpage[rowpair];
                 belowptr = belowsrc[rowpair];
                 dstptr = dstpage[rowpair];
-                //printf("above: %p, self %p, below %p dst: %p\n", aboveptr, rowptr, belowptr, dstptr);
-                //wait_for_keypress(CH_ENTER);
 
-                for (col = 0; col < MAXCOLCNT; col++) {
-                    if (col == 0) {
-                        A1 = aboveptr[MAXCOLIDX]    & ODD_ROW_MASK ? 1 : 0;
-                        A2 = aboveptr[0]            & ODD_ROW_MASK ? 1 : 0;
-                        A3 = aboveptr[1]            & ODD_ROW_MASK ? 1 : 0;
-                        A4 = rowptr[MAXCOLIDX]      & EVEN_ROW_MASK ? 1 : 0;
-                        A5 = rowptr[0]              & EVEN_ROW_MASK ? 1 : 0;
-                        A6 = rowptr[1]              & EVEN_ROW_MASK ? 1 : 0;
-                        A7 = rowptr[MAXCOLIDX]      & ODD_ROW_MASK ? 1 : 0;
-                        A8 = rowptr[0]              & ODD_ROW_MASK ? 1 : 0;
-                        A9 = rowptr[1]              & ODD_ROW_MASK ? 1 : 0;
+                col = 0;
+                A1 = aboveptr[MAXCOLIDX]    & ODD_ROW_MASK ? 1 : 0;
+                A2 = aboveptr[0]            & ODD_ROW_MASK ? 1 : 0;
+                A3 = aboveptr[1]            & ODD_ROW_MASK ? 1 : 0;
+                A4 = rowptr[MAXCOLIDX]      & EVEN_ROW_MASK ? 1 : 0;
+                A5 = rowptr[0]              & EVEN_ROW_MASK ? 1 : 0;
+                A6 = rowptr[1]              & EVEN_ROW_MASK ? 1 : 0;
+                A7 = rowptr[MAXCOLIDX]      & ODD_ROW_MASK ? 1 : 0;
+                A8 = rowptr[0]              & ODD_ROW_MASK ? 1 : 0;
+                A9 = rowptr[1]              & ODD_ROW_MASK ? 1 : 0;
+                B1 = belowptr[MAXCOLIDX]    & EVEN_ROW_MASK ? 1 : 0;
+                B2 = belowptr[0]            & EVEN_ROW_MASK ? 1 : 0;
+                B3 = belowptr[1]            & EVEN_ROW_MASK ? 1 : 0;
 
-                        B1 = belowptr[MAXCOLIDX]    & EVEN_ROW_MASK ? 1 : 0;
-                        B2 = belowptr[0]            & EVEN_ROW_MASK ? 1 : 0;
-                        B3 = belowptr[1]            & EVEN_ROW_MASK ? 1 : 0;
-                    }
-                    else if (col == MAXCOLIDX) {
-                        A1 = aboveptr[col-1]        & ODD_ROW_MASK ? 1 : 0;
-                        A2 = aboveptr[col]          & ODD_ROW_MASK ? 1 : 0;
-                        A3 = aboveptr[0]            & ODD_ROW_MASK ? 1 : 0;
-                        A4 = rowptr[col-1]          & EVEN_ROW_MASK ? 1 : 0;
-                        A5 = rowptr[col]            & EVEN_ROW_MASK ? 1 : 0;
-                        A6 = rowptr[0]              & EVEN_ROW_MASK ? 1 : 0;
-                        A7 = rowptr[col-1]          & ODD_ROW_MASK ? 1 : 0;
-                        A8 = rowptr[col]            & ODD_ROW_MASK ? 1 : 0;
-                        A9 = rowptr[0]              & ODD_ROW_MASK ? 1 : 0;
+                A = (A1 + A2 + A3 \
+                   + A4      + A6 \
+                   + A7 + A8 + A9);
 
-                        B1 = belowptr[col-1]        & EVEN_ROW_MASK ? 1 : 0;
-                        B2 = belowptr[col]          & EVEN_ROW_MASK ? 1 : 0;
-                        B3 = belowptr[0]            & EVEN_ROW_MASK ? 1 : 0;
-                    }
-                    else {
-                        A1 = aboveptr[col-1]        & ODD_ROW_MASK ? 1 : 0;
-                        A2 = aboveptr[col]          & ODD_ROW_MASK ? 1 : 0;
-                        A3 = aboveptr[col+1]        & ODD_ROW_MASK ? 1 : 0;
-                        A4 = rowptr[col-1]          & EVEN_ROW_MASK ? 1 : 0;
-                        A5 = rowptr[col]            & EVEN_ROW_MASK ? 1 : 0;
-                        A6 = rowptr[col+1]          & EVEN_ROW_MASK ? 1 : 0;
-                        A7 = rowptr[col-1]          & ODD_ROW_MASK ? 1 : 0;
-                        A8 = rowptr[col]            & ODD_ROW_MASK ? 1 : 0;
-                        A9 = rowptr[col+1]          & ODD_ROW_MASK ? 1 : 0;
+                B = (A4 + A5 + A6 \
+                   + A7      + A9 \
+                   + B1 + B2 + B3);
 
-                        B1 = belowptr[col-1]        & EVEN_ROW_MASK ? 1 : 0;
-                        B2 = belowptr[col]          & EVEN_ROW_MASK ? 1 : 0;
-                        B3 = belowptr[col+1]        & EVEN_ROW_MASK ? 1 : 0;
-                    }
+                if ((A5 && ((A == 2) || (A == 3))) || 
+                    ((A5 == 0) && (A == 3))) {
+                    //even row is alive
+                    result = EVEN_ROW_MASK;
+                }
+                else {
+                    //even row is dead
+                    result = 0;
+                }
+
+                // at this point odd row has already been assigned as dead
+                if ((A8 && ((B == 2) || (B == 3))) || 
+                    ((A8 == 0) && (B == 3))) {
+                    //odd row is alive
+                    result |= ODD_ROW_MASK;
+                }
+                dstptr[0]=result;
+                if (0) { //(A || B) {
+                    printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", rowpair * 2, col, A, A1, A2, A3, A4, A5, A6, A7, A8, A9);
+                    printf("\n");
+                    printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", (rowpair * 2) + 1, col, B, A4, A5, A6, A7, A8, A9, B1, B2, B3);
+                    wait_for_keypress(CH_ENTER);
+                    printf("\n");
+                }
+
+                for (col = 1; col < MAXCOLCNT - 1; col++) {
+                    A1 = aboveptr[col-1]        & ODD_ROW_MASK ? 1 : 0;
+                    A2 = aboveptr[col]          & ODD_ROW_MASK ? 1 : 0;
+                    A3 = aboveptr[col+1]        & ODD_ROW_MASK ? 1 : 0;
+                    A4 = rowptr[col-1]          & EVEN_ROW_MASK ? 1 : 0;
+                    A5 = rowptr[col]            & EVEN_ROW_MASK ? 1 : 0;
+                    A6 = rowptr[col+1]          & EVEN_ROW_MASK ? 1 : 0;
+                    A7 = rowptr[col-1]          & ODD_ROW_MASK ? 1 : 0;
+                    A8 = rowptr[col]            & ODD_ROW_MASK ? 1 : 0;
+                    A9 = rowptr[col+1]          & ODD_ROW_MASK ? 1 : 0;
+                    B1 = belowptr[col-1]        & EVEN_ROW_MASK ? 1 : 0;
+                    B2 = belowptr[col]          & EVEN_ROW_MASK ? 1 : 0;
+                    B3 = belowptr[col+1]        & EVEN_ROW_MASK ? 1 : 0;
 
                     A = (A1 + A2 + A3 \
                        + A4      + A6 \
@@ -140,15 +152,60 @@ void opt1_engine(void)
                         //odd row is alive
                         result |= ODD_ROW_MASK;
                     }
-
                     dstptr[col]=result;
-#if 0
+                    if (0) { //A || B) {
+                        printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", rowpair * 2, col, A, A1, A2, A3, A4, A5, A6, A7, A8, A9);
+                        printf("\n");
+                        printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", (rowpair * 2) + 1, col, B, A4, A5, A6, A7, A8, A9, B1, B2, B3);
+                        wait_for_keypress(CH_ENTER);
+                        printf("\n");
+                    }
+                }
+
+                col = MAXCOLIDX;
+                A1 = aboveptr[MAXCOLIDX-1]        & ODD_ROW_MASK ? 1 : 0;
+                A2 = aboveptr[MAXCOLIDX]          & ODD_ROW_MASK ? 1 : 0;
+                A3 = aboveptr[0]                  & ODD_ROW_MASK ? 1 : 0;
+                A4 = rowptr[MAXCOLIDX-1]          & EVEN_ROW_MASK ? 1 : 0;
+                A5 = rowptr[MAXCOLIDX]            & EVEN_ROW_MASK ? 1 : 0;
+                A6 = rowptr[0]                    & EVEN_ROW_MASK ? 1 : 0;
+                A7 = rowptr[MAXCOLIDX-1]          & ODD_ROW_MASK ? 1 : 0;
+                A8 = rowptr[MAXCOLIDX]            & ODD_ROW_MASK ? 1 : 0;
+                A9 = rowptr[0]                    & ODD_ROW_MASK ? 1 : 0;
+                B1 = belowptr[MAXCOLIDX-1]        & EVEN_ROW_MASK ? 1 : 0;
+                B2 = belowptr[MAXCOLIDX]          & EVEN_ROW_MASK ? 1 : 0;
+                B3 = belowptr[0]                  & EVEN_ROW_MASK ? 1 : 0;
+
+                A = (A1 + A2 + A3 \
+                   + A4      + A6 \
+                   + A7 + A8 + A9);
+
+                B = (A4 + A5 + A6 \
+                   + A7      + A9 \
+                   + B1 + B2 + B3);
+
+                if ((A5 && ((A == 2) || (A == 3))) || 
+                    ((A5 == 0) && (A == 3))) {
+                    //even row is alive
+                    result = EVEN_ROW_MASK;
+                }
+                else
+                    //even row is dead
+                    result = 0;
+
+                // at this point odd row has already been assigned as dead
+                if ((A8 && ((B == 2) || (B == 3))) || 
+                    ((A8 == 0) && (B == 3))) {
+                    //odd row is alive
+                    result |= ODD_ROW_MASK;
+                }
+                dstptr[MAXCOLIDX]=result;
+                if (0) { // A || B) {
                     printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", rowpair * 2, col, A, A1, A2, A3, A4, A5, A6, A7, A8, A9);
                     printf("\n");
                     printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", (rowpair * 2) + 1, col, B, A4, A5, A6, A7, A8, A9, B1, B2, B3);
                     wait_for_keypress(CH_ENTER);
                     printf("\n");
-#endif
                 }
             }
             softsw(dst + SS_PAGE2OFF);

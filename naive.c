@@ -68,11 +68,12 @@ void naive_analyze(uint16_t src[], uint16_t dst[])
     return;
 }
 
-void naive_engine(void)
+uint8_t naive_engine(void)
 {
+    uint8_t res;
     while (1) {
-        if (process_keys())
-            break;
+        if (res = process_keys())
+            return res;
         naive_analyze(gr_page[0], gr_page[1]);
         softsw(SS_PAGE2ON);
         naive_analyze(gr_page[1], gr_page[0]);

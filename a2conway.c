@@ -17,6 +17,8 @@
  * for lores graphics mode 40 x 48 x 16 colors 
  * we are using 40 x 40 x 16 
  */
+uint8_t engine;
+
 uint16_t gr_page[2][24]={ {
     // first page of lores graphics memory is 24 pairs of rows
     0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700, 0x0780,
@@ -125,6 +127,14 @@ uint8_t process_keys(void)
             printf("PAUSED. Press Enter to Continue.\n");
             wait_for_keypress(CH_ENTER);
         }
+        else if (c == '0') {
+            engine=0;
+            return 2;
+        }
+        else if (c == '1') {
+            engine=1;
+            return 2;
+        }
         else if (c == 'q') 
             return 1;
         else if (c == 'r') 
@@ -139,7 +149,7 @@ uint8_t process_keys(void)
 
 int main(void)
 {
-    uint8_t engine = 1;
+    engine = 1;
     // our program just uses the bottom 4 lines of the display
     printf("built at %s %s\n", __DATE__, __TIME__);
     printf("\nHotkeys:\n");
@@ -159,6 +169,7 @@ int main(void)
     gr_mode(SS_PAGE2OFF, SS_MIXEDOFF);
 #endif
     glider(gr_page[0]);
+
 
     if (engine == 0)
         naive_engine();
