@@ -43,16 +43,23 @@ void opt1_engine(void)
             printf("src page: %d dst page: %d\n", src,dst);
             srcpage=gr_page[src];
             dstpage=dstpage;
+#if 0
+            for (rowpair=0; rowpair < MAXPAIRROWCNT; rowpair++) {   
+                // row specific metadata need only be set up once:
+                aboveptr = pageabove[src][rowpair];
+                rowptr = srcpage[rowpair];
+                belowptr = pagebelow[src][rowpair];
+                printf("above: %p, self %p, below %p\n", aboveptr, rowptr, belowptr);
 
-            for (row=0; row < MAXROWCNT; row++) {   
+                A1 = 
 
-                aboveptr = pageabove[src][row/2];
-                rowptr = srcpage[row/2];
-                belowptr = pagebelow[src][row/2];
 
-                mask = ((row % 2) ? 0xF0 :  0x0F);
+                for (rowparity=0; rowparity < 2; rowparity++) {
+                    row = (rowpair * 2) + rowparity;
+                    mask = MASK_BY_ROW(row);
+                    printf ("rowpair: %d rowparity: %d row: %d mask %x\n", rowpair, rowparity, row, mask);
+                    wait_for_keypress(CH_ENTER);
 
-                printf ("rowswitch: %d mask %x\n", (row % 2), mask);
                 // logic for first column:
                 col = 0;
                 alive = rowptr[0] & mask;
@@ -68,11 +75,14 @@ void opt1_engine(void)
 
                 if (count_neighbors(srcpage, row, col) != n) {
                     printf ("alg fail: %d, %d: right: %d wrong: %d\n", row, col, count_neighbors(srcpage, row, col), n);
-                    //printf("above: %p, self %p, below %p\n", aboveptr, rowptr, belowptr);
                     wait_for_keypress(CH_ENTER);
 
                     if (peek_pixel(srcpage, ROWABOVE(row), COLLEFT(col)) != ((aboveptr[MAXCOLIDX] & mask) ? 1 : 0 )) {
-                        printf ("disagree %d, %d: above left (%d, %d) alive: r%d w%d\n", row, col, row - 1, MAXCOLIDX, peek_pixel(srcpage, ROWABOVE(row), COLLEFT(col)), ((aboveptr[MAXCOLIDX] & mask) ? 1 : 0 ));
+                        printf ("disagree %d, %d: above left (%d, %d) alive: r%d w%d\n", 
+                            row, col, 
+                            row - 1, MAXCOLIDX, 
+                            peek_pixel(srcpage, ROWABOVE(row), COLLEFT(col)), 
+                            ((aboveptr[MAXCOLIDX] & mask) ? 1 : 0 ));
                         wait_for_keypress(CH_ENTER);
                     }
                     if (peek_pixel(srcpage, ROWABOVE(row), col) != ((aboveptr[col] & mask) ? 1 : 0 )) {
@@ -168,6 +178,7 @@ void opt1_engine(void)
             }
             // after drawing, switch the page
             //wait_for_keypress(CH_ENTER);
+#endif
             softsw(dst + SS_PAGE2OFF);
         }
     }

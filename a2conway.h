@@ -44,7 +44,9 @@ typedef char            int8_t;   // 1 byte
 #define LORES_ROWS              20
 
 #define CLEARKEYBUF             while((PEEK(KEYPRESS_BUF_ADDR)) > 127) POKE(KEYCLEAR_BUF_ADDR, 0)
-#define MASK_BY_ROW(x)          (((x) & 0x1) ? 0xF0: 0x0F)
+#define EVEN_ROW_MASK           0x0F
+#define ODD_ROW_MASK            0xF0
+#define MASK_BY_ROW(x)          (((x) & 0x1) ? ODD_ROW_MASK : EVEN_ROW_MASK)
 
 #define ROWABOVE(x) ( x == 0 ? MAXROWIDX  : (x - 1))
 #define ROWBELOW(x) ( x == MAXROWIDX ? 0 : (x + 1))
@@ -64,4 +66,5 @@ uint8_t process_keys(void);
 void opt1_engine(void);
 void wait_for_keypress(uint8_t key);
 uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col);
+//#define peek_pixel(base, r, c) ((((uint8_t *)base[(r)/2])[(c)]) & MASK_BY_ROW(r) ? 1 : 0  )
 uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);

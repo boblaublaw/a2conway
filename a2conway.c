@@ -83,11 +83,11 @@ void lo_plot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
     uint8_t *rowptr = baseaddr[pairrow];
     if (row & 0x1) {
         color <<= 4;
-        rowptr[col] = (rowptr[col] & 0x0F ) | color;
+        rowptr[col] = (rowptr[col] & EVEN_ROW_MASK ) | color;
     }
     else {
-        color &= 0xF;
-        rowptr[col] = (rowptr[col] & 0xF0 ) | color;
+        color &= 0x0F;
+        rowptr[col] = (rowptr[col] & ODD_ROW_MASK ) | color;
     }
 }
 

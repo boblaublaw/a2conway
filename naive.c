@@ -11,11 +11,7 @@ extern uint16_t gr_page[2][24];
 
 uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
-    uint8_t *rowptr = baseaddr[ row / 2 ];
-
-    if (rowptr[col] & MASK_BY_ROW(row))
-        return 1;
-    return 0;
+    return (((uint8_t *)baseaddr[row/2])[col] & MASK_BY_ROW(row)) ? 1 : 0;
 }
 
 uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
