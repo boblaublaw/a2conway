@@ -124,8 +124,10 @@ uint8_t process_keys(void)
         CLEARKEYBUF;
 
         if (c == 'p') {
-            printf("PAUSED. Press Enter to Continue.\n");
-            wait_for_keypress(CH_ENTER);
+#ifdef MIXED_MODE
+            printf("PAUSED. Press p to Continue.\n");
+#endif
+            wait_for_keypress('p');
         }
         else if (c == '1') {
             engine_sel=ENGINE_SEL_NAIVE;
@@ -184,6 +186,7 @@ int main(void)
             opt1_engine();
     }
     
+    // all done
     POKE(TEXTWINDOW_TOP_EDGE,0);
     softsw(SS_TEXTON);
     
