@@ -17,7 +17,13 @@
  * for lores graphics mode 40 x 48 x 16 colors 
  * we are using 40 x 40 x 16 
  */
+
+// engine variables tell this program to stop, start, and which
+// cell processing "engine" to use.
 uint8_t engine_sel, engine_state;
+
+// infinity determines if the world wraps around at the edges
+uint8_t infinity;
 
 uint16_t gr_page[2][24]={ {
     // first page of lores graphics memory is 24 pairs of rows
@@ -45,7 +51,6 @@ void wait_for_keypress(uint8_t key)
             }
             if (c == 'q')
                 exit(EXIT_SUCCESS);
-            CLEARKEYBUF;
         }
     }
 }
@@ -115,6 +120,16 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     }
 }
 
+void toggle_infinity(void)
+{
+    if (infinity == INFINITE)
+        infinity = FINITE;
+    else
+        infinity = INFINITE;
+    printf ("toggling infinity to %s\n", (infinity ? "on" : "off"));
+}
+
+// returning 1 will cause the currently running engine to exit
 uint8_t process_keys(void) 
 {
     uint8_t c;
@@ -143,6 +158,8 @@ uint8_t process_keys(void)
             engine_state=ENGINE_STOP;
             return 1;
         }
+        else if (c == 'i')
+            toggle_infinity();
         else if (c == 'r') 
             randomize(gr_page[0], 400);
         else if (c == 'g')
@@ -153,24 +170,32 @@ uint8_t process_keys(void)
     return 0;
 }
 
-int main(void)
+void startup(void)
 {
-    engine_sel = ENGINE_SEL_OPT1;
-    engine_state = ENGINE_RUN;
-    // our program just uses the bottom 4 lines of the display
     printf("built at %s %s\n", __DATE__, __TIME__);
     printf("\nHotkeys:\n");
     printf("\tr: randomize\n");
     printf("\tg: gosper glider gun\n");
     printf("\ts: simkins glider gun\n");
+    printf("\ti: toggle infinite wraparound\n");
     printf("\tp: pause\n");
     printf("\t1: switch to naive engine\n");
     printf("\t2: switch to optimized engine\n");
     printf("\tq: quit\n");
     printf("press enter to start\n");
     wait_for_keypress(CH_ENTER);
+}
+
+int main(void)
+{
+    infinity = FINITE;
+    engine_sel = ENGINE_SEL_OPT1;
+    engine_state = ENGINE_RUN;
+
+    startup();
 
 #ifdef MIXED_MODE
+    // our program just uses the bottom 4 lines of the display
     gotoxy(0,MAXROWPAIRCNT);
     POKE(TEXTWINDOW_TOP_EDGE,MAXROWPAIRCNT);
     gr_mode(SS_PAGE2OFF, SS_MIXEDON);

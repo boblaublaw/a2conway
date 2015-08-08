@@ -7,7 +7,10 @@ typedef unsigned char   uint8_t;  // 1 byte
 typedef char            int8_t;   // 1 byte
 
 // defines
-//#define MIXED_MODE              1
+#define MIXED_MODE              1
+
+#define FINITE                  0
+#define INFINITE                1
 
 #define ENGINE_STOP             0
 #define ENGINE_RUN              1
@@ -59,10 +62,15 @@ typedef char            int8_t;   // 1 byte
 #define ODD_ROW_MASK            0xF0
 #define MASK_BY_ROW(x)          (((x) & 0x1) ? ODD_ROW_MASK : EVEN_ROW_MASK)
 
-#define ROWABOVE(x) ( x == 0 ? MAXROWIDX  : (x - 1))
-#define ROWBELOW(x) ( x == MAXROWIDX ? 0 : (x + 1))
-#define COLLEFT(y)  ( y == 0 ? MAXCOLIDX  : (y - 1))
-#define COLRIGHT(y) ( y == MAXCOLIDX ? 0 : (y + 1))
+#define INF_ROWABOVE(x) ( x == 0 ? MAXROWIDX  : (x - 1))
+#define INF_ROWBELOW(x) ( x == MAXROWIDX ? 0 : (x + 1))
+#define INF_COLLEFT(y)  ( y == 0 ? MAXCOLIDX  : (y - 1))
+#define INF_COLRIGHT(y) ( y == MAXCOLIDX ? 0 : (y + 1))
+
+#define FIN_ROWABOVE(x) ( x == 0 ? -1  : (x - 1))
+#define FIN_ROWBELOW(x) ( x == MAXROWIDX ? -1 : (x + 1))
+#define FIN_COLLEFT(y)  ( y == 0 ? -1  : (y - 1))
+#define FIN_COLRIGHT(y) ( y == MAXCOLIDX ? -1 : (y + 1))
 
 void text_mode(void);
 void gr_mode(uint16_t page, uint16_t mode);
@@ -76,5 +84,5 @@ void naive_engine(void);
 uint8_t process_keys(void);
 void opt1_engine(void);
 void wait_for_keypress(uint8_t key);
-uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col);
+uint8_t peek_pixel(uint16_t baseaddr[], int8_t row, int8_t col);
 uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);

@@ -1,5 +1,6 @@
 #include "a2conway.h"
 #include <peekpoke.h>   // POKE
+#include <stdio.h>      // printf
 
 /*
  * This is the totally unoptimized implementation of Conway's
@@ -8,41 +9,45 @@
  */
 
 extern uint16_t gr_page[2][24];
+extern uint8_t infinity;
 
-uint8_t peek_pixel(uint16_t baseaddr[], uint8_t row, uint8_t col)
+uint8_t peek_pixel(uint16_t baseaddr[], int8_t row, int8_t col)
 {
+    if ((row == 255) || (col == 255)) {
+        //printf ("out of bounds: %d,%d\n", row, col);
+        return 0;
+    }
     return (((uint8_t *)baseaddr[row/2])[col] & MASK_BY_ROW(row)) ? 1 : 0;
 }
 
-uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
+uint8_t finite_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
     uint8_t count = 0;
-    if (peek_pixel(baseaddr, ROWABOVE(row), col)) {
-        count++;
-    }
-    if (peek_pixel(baseaddr, ROWBELOW(row), col)) {
-        count++;
-    }
-    if (peek_pixel(baseaddr, row, COLLEFT(col))) {
-        count++;
-    }
-    if (peek_pixel(baseaddr, row, COLRIGHT(col))) {
-        count++;
-    }
-    if (peek_pixel(baseaddr, ROWABOVE(row), COLLEFT(col))) {
-        count++;
-    }  
-    if (peek_pixel(baseaddr, ROWBELOW(row), COLLEFT(col))) {
-        count++;
-    }  
-    if (peek_pixel(baseaddr, ROWABOVE(row), COLRIGHT(col))) {
-        count++;
-    }   
-    if (peek_pixel(baseaddr, ROWBELOW(row), COLRIGHT(col))) {
-        count++;
-    }   
+    if (peek_pixel(baseaddr, FIN_ROWABOVE(row), col)) count++;
+    if (peek_pixel(baseaddr, FIN_ROWBELOW(row), col)) count++;
+    if (peek_pixel(baseaddr, row, FIN_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, row, FIN_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, FIN_ROWABOVE(row), FIN_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, FIN_ROWBELOW(row), FIN_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, FIN_ROWABOVE(row), FIN_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, FIN_ROWBELOW(row), FIN_COLRIGHT(col))) count++;
     return count;
 }   
+
+uint8_t infinite_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
+{
+    uint8_t count = 0;
+    if (peek_pixel(baseaddr, INF_ROWABOVE(row), col)) count++;
+    if (peek_pixel(baseaddr, INF_ROWBELOW(row), col)) count++;
+    if (peek_pixel(baseaddr, row, INF_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, row, INF_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, INF_ROWABOVE(row), INF_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, INF_ROWBELOW(row), INF_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, INF_ROWABOVE(row), INF_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, INF_ROWBELOW(row), INF_COLRIGHT(col))) count++;
+    return count;
+}   
+
 
 void naive_analyze(uint16_t src[], uint16_t dst[])
 {
@@ -50,7 +55,10 @@ void naive_analyze(uint16_t src[], uint16_t dst[])
 
     for (row=0; row < MAXROWCNT; row++) {   
         for (col=0; col < MAXCOLCNT; col++) {
-            n = count_neighbors(src, row, col);
+            if (infinity)
+                n = infinite_count_neighbors(src, row, col);
+            else
+                n = finite_count_neighbors(src, row, col);
             if (peek_pixel(src, row, col)) {
                 if ((n == 2) || (n == 3))
                     lo_plot(dst, row, col, 0xF);
