@@ -12,6 +12,9 @@
 
 extern uint16_t gr_page[2][24];
 #ifdef MIXED_MODE
+/*
+ * In mixed text/graphics mode, only 20 rowpair addresses are needed
+ */
 uint16_t pageabove[2][24]={ {
     0x05D0, 0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700, 
     0x0780, 0x0428, 0x04A8, 0x0528, 0x05A8, 0x0628, 0x06A8, 0x0728, 
@@ -27,6 +30,9 @@ uint16_t pagebelow[2][24]={ {
     0x08A8, 0x0928, 0x09A8, 0x0A28, 0x0AA8, 0x0B28, 0x0BA8, 0x0850, 
     0x08D0, 0x0950, 0x09D0, 0x0800, 0x0000, 0x0000, 0x0000, 0x0000 } };
 #else
+/*
+ * In fullscreen graphics mode, 24 rowpair addresses are needed
+ */
 uint16_t pageabove[2][24]={ {
     0x07D0, 0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700, 
     0x0780, 0x0428, 0x04A8, 0x0528, 0x05A8, 0x0628, 0x06A8, 0x0728, 
@@ -68,7 +74,6 @@ void opt1_engine(void)
                 belowptr = belowsrc[rowpair];
                 dstptr = dstpage[rowpair];
 
-                col = 0;
                 A1 = aboveptr[MAXCOLIDX]    & ODD_ROW_MASK ? 1 : 0;
                 A2 = aboveptr[0]            & ODD_ROW_MASK ? 1 : 0;
                 A3 = aboveptr[1]            & ODD_ROW_MASK ? 1 : 0;
@@ -90,30 +95,22 @@ void opt1_engine(void)
                    + A7      + A9 \
                    + B1 + B2 + B3);
 
+                //start by presuming everything is dead
+                result = 0;
+                // upper cell
                 if ((A5 && ((A == 2) || (A == 3))) || 
                     ((A5 == 0) && (A == 3))) {
                     //even row is alive
                     result = EVEN_ROW_MASK;
                 }
-                else {
-                    //even row is dead
-                    result = 0;
-                }
-
-                // at this point odd row has already been assigned as dead
+                // lower cell
                 if ((A8 && ((B == 2) || (B == 3))) || 
                     ((A8 == 0) && (B == 3))) {
                     //odd row is alive
                     result |= ODD_ROW_MASK;
                 }
+                // save cell
                 dstptr[0]=result;
-                if (0) { //(A || B) {
-                    printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", rowpair * 2, col, A, A1, A2, A3, A4, A5, A6, A7, A8, A9);
-                    printf("\n");
-                    printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", (rowpair * 2) + 1, col, B, A4, A5, A6, A7, A8, A9, B1, B2, B3);
-                    wait_for_keypress(CH_ENTER);
-                    printf("\n");
-                }
 
                 for (col = 1; col < MAXCOLCNT - 1; col++) {
                     A1 = aboveptr[col-1]        & ODD_ROW_MASK ? 1 : 0;
@@ -137,32 +134,19 @@ void opt1_engine(void)
                        + A7      + A9 \
                        + B1 + B2 + B3);
 
+                    result = 0;
                     if ((A5 && ((A == 2) || (A == 3))) || 
                         ((A5 == 0) && (A == 3))) {
-                        //even row is alive
                         result = EVEN_ROW_MASK;
                     }
-                    else
-                        //even row is dead
-                        result = 0;
 
-                    // at this point odd row has already been assigned as dead
                     if ((A8 && ((B == 2) || (B == 3))) || 
                         ((A8 == 0) && (B == 3))) {
-                        //odd row is alive
                         result |= ODD_ROW_MASK;
                     }
                     dstptr[col]=result;
-                    if (0) { //A || B) {
-                        printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", rowpair * 2, col, A, A1, A2, A3, A4, A5, A6, A7, A8, A9);
-                        printf("\n");
-                        printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", (rowpair * 2) + 1, col, B, A4, A5, A6, A7, A8, A9, B1, B2, B3);
-                        wait_for_keypress(CH_ENTER);
-                        printf("\n");
-                    }
                 }
 
-                col = MAXCOLIDX;
                 A1 = aboveptr[MAXCOLIDX-1]        & ODD_ROW_MASK ? 1 : 0;
                 A2 = aboveptr[MAXCOLIDX]          & ODD_ROW_MASK ? 1 : 0;
                 A3 = aboveptr[0]                  & ODD_ROW_MASK ? 1 : 0;
@@ -184,29 +168,16 @@ void opt1_engine(void)
                    + A7      + A9 \
                    + B1 + B2 + B3);
 
+                result = 0;
                 if ((A5 && ((A == 2) || (A == 3))) || 
                     ((A5 == 0) && (A == 3))) {
-                    //even row is alive
                     result = EVEN_ROW_MASK;
                 }
-                else
-                    //even row is dead
-                    result = 0;
-
-                // at this point odd row has already been assigned as dead
                 if ((A8 && ((B == 2) || (B == 3))) || 
                     ((A8 == 0) && (B == 3))) {
-                    //odd row is alive
                     result |= ODD_ROW_MASK;
                 }
                 dstptr[MAXCOLIDX]=result;
-                if (0) { // A || B) {
-                    printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", rowpair * 2, col, A, A1, A2, A3, A4, A5, A6, A7, A8, A9);
-                    printf("\n");
-                    printf("[%d,%d]:n:%d %d%d%d %d%d%d %d%d%d", (rowpair * 2) + 1, col, B, A4, A5, A6, A7, A8, A9, B1, B2, B3);
-                    wait_for_keypress(CH_ENTER);
-                    printf("\n");
-                }
             }
             softsw(dst + SS_PAGE2OFF);
         }
