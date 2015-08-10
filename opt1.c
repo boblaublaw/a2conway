@@ -2,8 +2,16 @@
 #include "a2conway.h"
 
 /*
- * This is the second optimized implementation of Conway's
+ * This is the first optimized implementation of Conway's
  * Game Of Life. 
+ *
+ * memory addresses for rows are loaded into indexed lookup tables.
+ * Since LO-RES graphics use one byte for two pixels, two life cells
+ * are examined at a time.
+ *
+ * The column loop is partially unrolled in that the first and last
+ * columns are specialed outside the loop, due to their special cases
+ * for wrapping the world from col 39 to col 0.
  */
 
 extern uint16_t gr_page[2][24];
@@ -105,6 +113,9 @@ void opt1_engine(void)
                 // save new upper and lower cell together
                 dstptr[0]=result;
 
+                // shift a 4x3 grid one cell to the right, allowing
+                // us to reuse the counted values from the left 2 
+                // columns.  only the right column is new information.
                 for (col = 1; col < MAXCOLCNT - 1; col++) {
                     A1 = A2;
                     A2 = A3;
@@ -136,15 +147,18 @@ void opt1_engine(void)
                     dstptr[col]=result;
                 }
 
+                // on the rightmost examination, the cells to the right
+                // are actually the first cell in this row (due to wrap
+                // around.)  
                 A1 = A2;
                 A2 = A3;
-                A3 = aboveptr[0]                  & ODD_ROW_MASK ? 1 : 0;
+                A3 = aboveptr[0]                  & ODD_ROW_MASK  ? 1 : 0;
                 A4 = A5;
                 A5 = A6;
                 A6 = rowptr[0]                    & EVEN_ROW_MASK ? 1 : 0;
                 A7 = A8;
                 A8 = A9;
-                A9 = rowptr[0]                    & ODD_ROW_MASK ? 1 : 0;
+                A9 = rowptr[0]                    & ODD_ROW_MASK  ? 1 : 0;
                 B1 = B2;
                 B2 = B3;
                 B3 = belowptr[0]                  & EVEN_ROW_MASK ? 1 : 0;
@@ -164,6 +178,7 @@ void opt1_engine(void)
                 }
                 dstptr[MAXCOLIDX]=result;
             }
+            // flip the graphics page
             softsw(dst + SS_PAGE2OFF);
         }
     }

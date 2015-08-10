@@ -126,7 +126,9 @@ void toggle_infinity(void)
         infinity = FINITE;
     else
         infinity = INFINITE;
+#ifdef MIXED_MODE
     printf ("toggling infinity to %s\n", (infinity ? "on" : "off"));
+#endif
 }
 
 // returning 1 will cause the currently running engine to exit
@@ -154,11 +156,13 @@ uint8_t process_keys(void)
             engine_state=ENGINE_RUN;
             return 1;
         }
+#if 0
         else if (c == '3') {
             engine_sel=ENGINE_SEL_OPT2;
             engine_state=ENGINE_RUN;
             return 1;
         }
+#endif
         else if (c == 'q') {
             engine_state=ENGINE_STOP;
             return 1;
@@ -186,7 +190,7 @@ void startup(void)
     printf("\tr: randomize\n");
     printf("\tg: gosper glider gun\n");
     printf("\ts: simkins glider gun\n");
-    printf("\ti: toggle infinite wraparound (naive only)\n");
+    printf("\ti: toggle finite edge wrap (naive only)\n");
     printf("\tp: pause\n");
     printf("\t1: switch to naive engine\n");
     printf("\t2: switch to optimized engine 1\n");
