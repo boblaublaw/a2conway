@@ -7,7 +7,7 @@ typedef unsigned char   uint8_t;  // 1 byte
 typedef char            int8_t;   // 1 byte
 
 // defines
-#define MIXED_MODE              1
+// #define MIXED_MODE              1
 
 #define FINITE                  0
 #define INFINITE                1

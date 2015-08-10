@@ -159,7 +159,11 @@ uint8_t process_keys(void)
             return 1;
         }
         else if (c == 'i')
-            toggle_infinity();
+            if (engine_sel != ENGINE_SEL_NAIVE) {
+                printf("finite field not supported outside naive engine\n");
+            } 
+            else 
+                toggle_infinity();
         else if (c == 'r') 
             randomize(gr_page[0], 400);
         else if (c == 'g')
@@ -177,7 +181,7 @@ void startup(void)
     printf("\tr: randomize\n");
     printf("\tg: gosper glider gun\n");
     printf("\ts: simkins glider gun\n");
-    printf("\ti: toggle infinite wraparound\n");
+    printf("\ti: toggle infinite wraparound (naive only)\n");
     printf("\tp: pause\n");
     printf("\t1: switch to naive engine\n");
     printf("\t2: switch to optimized engine\n");

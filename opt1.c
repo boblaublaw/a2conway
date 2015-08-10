@@ -1,5 +1,4 @@
 #include <peekpoke.h>           // POKE
-#include <stdio.h>              // printf
 #include <apple2enh.h>          // CH_ENTER
 #include "a2conway.h"
 
@@ -54,7 +53,8 @@ void opt1_engine(void)
 {
     uint8_t src, dst, col, result, rowpair;
     uint8_t A, B, A1, A2, A3, A4, A5, A6, A7, A8, A9, B1, B2, B3;
-    uint8_t *dstptr, *rowptr, *aboveptr, *belowptr;
+    register uint8_t *rowptr, *aboveptr, *belowptr;
+    uint8_t *dstptr;
     uint16_t *srcpage, *dstpage, *belowsrc, *abovesrc;
 
     while (1) {
@@ -62,7 +62,6 @@ void opt1_engine(void)
             break;
         for (src=0; src < 2; src++) {
             dst = !src;
-            //printf("src page: %d dst page: %d\n", src,dst);
             abovesrc=pageabove[src];
             srcpage=gr_page[src];
             belowsrc=pagebelow[src];
