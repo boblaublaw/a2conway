@@ -154,6 +154,11 @@ uint8_t process_keys(void)
             engine_state=ENGINE_RUN;
             return 1;
         }
+        else if (c == '3') {
+            engine_sel=ENGINE_SEL_OPT2;
+            engine_state=ENGINE_RUN;
+            return 1;
+        }
         else if (c == 'q') {
             engine_state=ENGINE_STOP;
             return 1;
@@ -184,7 +189,8 @@ void startup(void)
     printf("\ti: toggle infinite wraparound (naive only)\n");
     printf("\tp: pause\n");
     printf("\t1: switch to naive engine\n");
-    printf("\t2: switch to optimized engine\n");
+    printf("\t2: switch to optimized engine 1\n");
+    printf("\t3: switch to optimized engine 2\n");
     printf("\tq: quit\n");
     printf("press enter to start\n");
     wait_for_keypress(CH_ENTER);
@@ -211,8 +217,10 @@ int main(void)
     while (engine_state == ENGINE_RUN) {
         if (engine_sel == ENGINE_SEL_NAIVE)
             naive_engine();
-        else
+        else if (engine_sel == ENGINE_SEL_OPT1)
             opt1_engine();
+        else
+            opt2_engine();
     }
     
     // all done

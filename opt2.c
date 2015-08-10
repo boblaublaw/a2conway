@@ -47,7 +47,7 @@ uint16_t pagebelow[2][24]={ {
 #endif
 
 
-void opt1_engine(void)
+void opt2_engine(void)
 {
     uint8_t src, dst, col, result, rowpair;
     uint8_t A, B, A1, A2, A3, A4, A5, A6, A7, A8, A9, B1, B2, B3, CV;
@@ -84,26 +84,26 @@ void opt1_engine(void)
                 B2 = belowptr[0]            & EVEN_ROW_MASK ? 1 : 0;
                 B3 = belowptr[1]            & EVEN_ROW_MASK ? 1 : 0;
 
-                // CV is a value common to the sum of A and B, add it once
+                // CV is the common value to both A and B.
                 CV = A4 + A6 + A7 + A9;
                 A = A1 + A2 + A3 + CV + A8;
                 B = A5 + B1 + B2 + B3 + CV;
 
                 //start by presuming everything is dead
                 result = 0;
-                // upper cell is centered on A5
+                // upper cell
                 if ((A5 && ((A == 2) || (A == 3))) || 
                     ((A5 == 0) && (A == 3))) {
                     //even row is alive
                     result = EVEN_ROW_MASK;
                 }
-                // lower cell is centered on A8
+                // lower cell
                 if ((A8 && ((B == 2) || (B == 3))) || 
                     ((A8 == 0) && (B == 3))) {
                     //odd row is alive
                     result |= ODD_ROW_MASK;
                 }
-                // save new upper and lower cell together
+                // save cell
                 dstptr[0]=result;
 
                 for (col = 1; col < MAXCOLCNT - 1; col++) {

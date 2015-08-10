@@ -11,7 +11,8 @@ CFLAGS = -Ori --codesize 500
 IMGNAME = A2CONWAY.DSK
 
 # test program starts at $6000 to not overwrite graphics pages
-LDFLAGS_a2conway_apple2enh=--start-addr 24576
+#LDFLAGS_a2conway_apple2enh=--start-addr 24576
+LDFLAGS_a2conway_apple2enh=--start-addr 8192
 
 # Determine the path to the executables and libraries. If the samples
 # directory is part of a complete source tree, use the stuff from that
@@ -52,7 +53,7 @@ LD   = ld65
 
 EXELIST	=	a2conway 
 
-a2conway: a2conway.o glider.o simkins.o gospergun.o naive.o opt1.o
+a2conway: a2conway.o glider.o simkins.o gospergun.o naive.o opt1.o opt2.o
 
 
 # --------------------------------------------------------------------------

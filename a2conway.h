@@ -17,6 +17,7 @@ typedef char            int8_t;   // 1 byte
 
 #define ENGINE_SEL_NAIVE        1
 #define ENGINE_SEL_OPT1         2
+#define ENGINE_SEL_OPT2         3
 
 #define ROWRANDMASK             0x00FF
 #define COLRANDMASK             0xFF00
@@ -82,7 +83,8 @@ void gospergun(uint16_t page[]);
 void randomize(uint16_t baseaddr[], uint16_t count);
 void naive_engine(void);
 uint8_t process_keys(void);
-void opt1_engine(void);
 void wait_for_keypress(uint8_t key);
 uint8_t peek_pixel(uint16_t baseaddr[], int8_t row, int8_t col);
 uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);
+void opt1_engine(void);
+void opt2_engine(void);
