@@ -22,6 +22,7 @@ Hotkeys can be pressed at any time during A2CONWAY execution:
  * 2: switch to nowrap naive engine
  * 3: switch to wraparound optimized engine
  * 4: switch to nowrap optimized engine
+ * ?: show this hotkey information
  * q: quit
 
 Note that multiple "engines" are implmented.  The naive engines are very slow, but their code is easier to read.

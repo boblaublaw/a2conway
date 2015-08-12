@@ -151,6 +151,29 @@ uint8_t find_page(void)
 }
 
 /*
+ * print the show_hotkeys message
+ */
+void show_hotkeys(void)
+{
+    printf("A2Conway - by joe.boyle@gmail.com\n\n");
+    printf("built at %s %s\n", __DATE__, __TIME__);
+    printf("\nHotkeys:\n");
+    printf("\tr:randomize\n");
+    printf("\tg:spawn gosper glider gun\n");
+    printf("\ts:spawn simkins glider gun\n");
+    printf("\tp:pause\n");
+    printf("\t1:switch to wraparound naive engine *\n");
+    printf("\t2:switch to nowrap naive engine\n");
+    printf("\t3:switch to wraparound optimized engine\n");
+    printf("\t4:switch to nowrap optimized engine\n");
+    printf("\t?:show this text\n");
+    printf("\tq:quit\n\n");
+    printf("* = default mode\n\n");
+    printf("press enter to start\n");
+    wait_for_keypress(CH_ENTER);
+}
+
+/*
  * returning 1 will cause the currently running engine to exit
  */
 uint8_t process_keys(void) 
@@ -203,6 +226,19 @@ uint8_t process_keys(void)
             engine_state=ENGINE_STOP;
             return 1;
         }
+        else if (c == '?') {
+            memcpy((uint8_t *)0x5000,0x400,0x800);
+            text_mode();
+            show_hotkeys();
+#ifdef MIXED_MODE
+            gotoxy(0,MAXROWPAIRCNT);
+            POKE(TEXTWINDOW_TOP_EDGE,MAXROWPAIRCNT);
+            gr_mode(SS_PAGE2OFF, SS_MIXEDON);
+#else
+            gr_mode(SS_PAGE2OFF, SS_MIXEDOFF);
+#endif
+            memcpy((uint8_t *)0x400,0x5000,0x800);
+        }
         else if (c == 'r')
             randomize(gr_page[find_page()], 400);
         else if (c == 'g')
@@ -213,34 +249,12 @@ uint8_t process_keys(void)
     return 0;
 }
 
-/*
- * print the startup message
- */
-void startup(void)
-{
-    printf("A2Conway - by joe.boyle@gmail.com\n\n");
-    printf("built at %s %s\n", __DATE__, __TIME__);
-    printf("\nHotkeys:\n");
-    printf("\tr:randomize\n");
-    printf("\tg:spawn gosper glider gun\n");
-    printf("\ts:spawn simkins glider gun\n");
-    printf("\tp:pause\n");
-    printf("\t1:switch to wraparound naive engine *\n");
-    printf("\t2:switch to nowrap naive engine\n");
-    printf("\t3:switch to wraparound optimized engine\n");
-    printf("\t4:switch to nowrap optimized engine\n");
-    printf("\tq:quit\n\n");
-    printf("* = default mode\n\n");
-    printf("press enter to start\n");
-    wait_for_keypress(CH_ENTER);
-}
-
 int main(void)
 {
     engine_sel = ENGINE_SEL_WRAP_NAIVE;
     engine_state = ENGINE_RUN;
 
-    startup();
+    show_hotkeys();
 
 #ifdef MIXED_MODE
     // our program just uses the bottom 4 lines of the display
