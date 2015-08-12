@@ -163,13 +163,13 @@ void show_hotkeys(void)
     printf("\tg:spawn gosper glider gun\n");
     printf("\ts:spawn simkins glider gun\n");
     printf("\tp:pause\n");
-    printf("\t1:switch to wraparound naive engine *\n");
+    printf("\t1:switch to wraparound naive engine\n");
     printf("\t2:switch to nowrap naive engine\n");
     printf("\t3:switch to wraparound optimized engine\n");
+    printf("\t\t\t(3 is the default mode)\n");
     printf("\t4:switch to nowrap optimized engine\n");
     printf("\t?:show this text\n");
     printf("\tq:quit\n\n");
-    printf("* = default mode\n\n");
     printf("press enter to continue\n");
     wait_for_keypress(CH_ENTER);
 }
@@ -191,39 +191,39 @@ uint8_t process_keys(void)
             wait_for_keypress('p');
         }
         else if (c == '1') {
-            engine_sel=ENGINE_SEL_WRAP_NAIVE;
+            engine_sel = ENGINE_SEL_WRAP_NAIVE;
+            engine_state = ENGINE_RUN;
 #ifdef MIXED_MODE
             printf("Naive wrap mode enabled.\n");
 #endif
-            engine_state=ENGINE_RUN;
             return 1;
         }
         else if (c == '2') {
-            engine_sel=ENGINE_SEL_NOWRAP_NAIVE;
-            engine_state=ENGINE_RUN;
+            engine_sel = ENGINE_SEL_NOWRAP_NAIVE;
+            engine_state = ENGINE_RUN;
 #ifdef MIXED_MODE
             printf("Naive nowrap mode enabled.\n");
 #endif
             return 1;
         }
         else if (c == '3') {
-            engine_sel=ENGINE_SEL_WRAP_OPT;
-            engine_state=ENGINE_RUN;
+            engine_sel = ENGINE_SEL_WRAP_OPT;
+            engine_state = ENGINE_RUN;
 #ifdef MIXED_MODE
             printf("Optimized wrap mode enabled.\n");
 #endif
             return 1;
         }
         else if (c == '4') {
-            engine_sel=ENGINE_SEL_NOWRAP_OPT;
-            engine_state=ENGINE_RUN;
+            engine_sel = ENGINE_SEL_NOWRAP_OPT;
+            engine_state = ENGINE_RUN;
 #ifdef MIXED_MODE
             printf("Optimized nowrap mode enabled.\n");
 #endif
             return 1;
         }
         else if (tolower(c) == 'q') {
-            engine_state=ENGINE_STOP;
+            engine_state = ENGINE_STOP;
             return 1;
         }
         else if (c == '?') {
@@ -252,7 +252,7 @@ uint8_t process_keys(void)
 
 int main(void)
 {
-    engine_sel = ENGINE_SEL_WRAP_NAIVE;
+    engine_sel = ENGINE_SEL_WRAP_OPT;
     engine_state = ENGINE_RUN;
 
     show_hotkeys();
@@ -268,21 +268,26 @@ int main(void)
     glider(gr_page[0]);
 
     while (engine_state == ENGINE_RUN) {
-        if (engine_sel == ENGINE_SEL_WRAP_NAIVE)
-            naive_wrap_engine();
-        else if (engine_sel == ENGINE_SEL_NOWRAP_NAIVE)
-            naive_nowrap_engine();
-        else if (engine_sel == ENGINE_SEL_WRAP_OPT)
-            opt_wrap_engine();
-        else if (engine_sel == ENGINE_SEL_NOWRAP_OPT)
-            opt_nowrap_engine();
-        else {
+        switch (engine_sel) {
+            case ENGINE_SEL_WRAP_NAIVE:
+                naive_wrap_engine();
+                break;
+            case ENGINE_SEL_NOWRAP_NAIVE:
+                naive_nowrap_engine();
+                break;
+            case ENGINE_SEL_WRAP_OPT:
+                opt_wrap_engine();
+                break;
+            case ENGINE_SEL_NOWRAP_OPT:
+                opt_nowrap_engine();
+                break;
+            default:
 #ifdef MIXED_MODE
-            printf("bogus engine selection!\n");
+                printf("bogus engine selection!\n");
 #endif
-            engine_state = ENGINE_STOP;
+                engine_state = ENGINE_STOP;
+                break;
         }
-        
     }
     
     // all done

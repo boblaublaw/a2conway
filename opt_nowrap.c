@@ -2,7 +2,7 @@
 #include "a2conway.h"
 
 /*
- * This is the optimized "wraparound" implementation of Conway's
+ * This is the optimized "no-wrap" implementation of Conway's
  * Game Of Life.   
  *
  * memory addresses for rows are loaded into indexed lookup tables.
@@ -24,7 +24,7 @@ extern uint16_t pagebelow[2][24];
 #endif
 
 
-void opt_wrap_engine(void)
+void opt_nowrap_engine(void)
 {
     uint8_t src, dst, col, result, rowpair;
     uint8_t A, B, A1, A2, A3, A4, A5, A6, A7, A8, A9, B1, B2, B3, CV;
