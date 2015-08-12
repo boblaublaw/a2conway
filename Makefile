@@ -54,7 +54,7 @@ LD   = ld65
 EXELIST	=	a2conway 
 
 a2conway: a2conway.o glider.o simkins.o gospergun.o naive.o \
-			opt_fin.o opt_inf.o
+			opt_wrap.o opt_nowrap.o
 
 
 # --------------------------------------------------------------------------
