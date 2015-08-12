@@ -169,7 +169,7 @@ void show_hotkeys(void)
     printf("\t?:show this text\n");
     printf("\tq:quit\n\n");
     printf("* = default mode\n\n");
-    printf("press enter to start\n");
+    printf("press enter to continue\n");
     wait_for_keypress(CH_ENTER);
 }
 
@@ -229,6 +229,7 @@ uint8_t process_keys(void)
         else if (c == '?') {
             memcpy((uint8_t *)0x5000,0x400,0x800);
             text_mode();
+            printf("\n\n\n\n\n\n\n");
             show_hotkeys();
 #ifdef MIXED_MODE
             gotoxy(0,MAXROWPAIRCNT);
