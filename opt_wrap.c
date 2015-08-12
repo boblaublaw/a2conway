@@ -80,9 +80,9 @@ void opt_nowrap_engine(void)
     uint16_t *srcpage, *dstpage, *belowsrc, *abovesrc;
 
     while (1) {
-        if (process_keys())
-            break;
         for (src=0; src < 2; src++) {
+            if (process_keys())
+                return;
             dst = !src;
             abovesrc = pageabove[src];
             srcpage = gr_page[src];

@@ -99,10 +99,13 @@ void randomize(uint16_t baseaddr[], uint16_t count)
 {
     uint16_t r;
     uint8_t  row, col;
+    static uint8_t resetcount = 0;
+
     // The Apple zero page has some semi-random garbage
     // suitable for seeding our PRNG
     uint16_t seed = PEEK(RSEED1) + PEEK(RSEED2) * 256;
-    srand(seed);
+    ++resetcount;
+    srand(resetcount + seed);
     lo_clear(gr_page[0], TGI_COLOR_BLACK);
 
     while (count--) {
@@ -115,6 +118,12 @@ void randomize(uint16_t baseaddr[], uint16_t count)
         //printf("turning on %d,%d with %04x\n", row, col, r);
         lo_plot(baseaddr, row, col, 0xf);
     }
+}
+
+uint8_t find_page(void)
+{
+    printf("peek result %x\n", PEEK(ACTIVEPAGE));
+    return (PEEK(ACTIVEPAGE) & 0x80 ? 1 : 0);
 }
 
 // returning 1 will cause the currently running engine to exit
@@ -168,12 +177,12 @@ uint8_t process_keys(void)
             engine_state=ENGINE_STOP;
             return 1;
         }
-        else if (c == 'r') 
-            randomize(gr_page[0], 400);
+        else if (c == 'r')
+            randomize(gr_page[find_page()], 400);
         else if (c == 'g')
-            gospergun(gr_page[0]);
+            gospergun(gr_page[find_page()]);
         else if (c == 's')
-            simkins(gr_page[0]);
+            simkins(gr_page[find_page()]);
     }
     return 0;
 }

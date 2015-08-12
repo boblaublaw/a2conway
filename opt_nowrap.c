@@ -33,9 +33,9 @@ void opt_wrap_engine(void)
     uint16_t *srcpage, *dstpage, *belowsrc, *abovesrc;
 
     while (1) {
-        if (process_keys())
-            break;
         for (src=0; src < 2; src++) {
+            if (process_keys())
+                return;
             dst = !src;
             abovesrc = pageabove[src];
             srcpage = gr_page[src];
@@ -61,9 +61,9 @@ void opt_wrap_engine(void)
                 A8 = rowptr[0]            & ODD_ROW_MASK  ? 1 : 0;
                 A9 = rowptr[1]            & ODD_ROW_MASK  ? 1 : 0;
                 B1 = 0;
-                B2 = (rowpair == MAXROWPAIRCNT ) ? 0 : 
+                B2 = (rowpair == MAXROWPAIRIDX ) ? 0 :
                              (belowptr[0] & EVEN_ROW_MASK ? 1 : 0);
-                B3 = (rowpair == MAXROWPAIRCNT ) ? 0 : 
+                B3 = (rowpair == MAXROWPAIRIDX ) ? 0 :
                              (belowptr[1] & EVEN_ROW_MASK ? 1 : 0);
 
                 // CV is a value common to the sum of A and B, add it once
@@ -104,7 +104,7 @@ void opt_wrap_engine(void)
                     A9 = rowptr[col+1]          & ODD_ROW_MASK  ? 1 : 0;
                     B1 = B2;
                     B2 = B3;
-                    B3 = (rowpair == MAXROWPAIRCNT) ? 0 : 
+                    B3 = (rowpair == MAXROWPAIRIDX) ? 0 :
                         (belowptr[col+1]        & EVEN_ROW_MASK ? 1 : 0);
 
                     CV = A4 + A6 + A7 + A9;
@@ -124,21 +124,21 @@ void opt_wrap_engine(void)
                     dstptr[col]=result;
                 }
 
-                // on the rightmost examination, the cells to the right
-                // are actually the first cell in this row (due to wrap
-                // around.)  
+                // on the rightmost examination, there are no new
+                // cells to examine! skip A3, A6, A9, and B3!
+
                 A1 = A2;
                 A2 = A3;
-                // A3 = 0;
+                //A3 = 0;
                 A4 = A5;
                 A5 = A6;
-                // A6 = 0;
+                //A6 = 0;
                 A7 = A8;
                 A8 = A9;
-                // A9 = 0;
+                //A9 = 0;
                 B1 = B2;
                 B2 = B3;
-                // B3 = 0;
+                //B3 = 0;
 
                 CV = A4 + A7;
                 A = A1 + A2 + CV + A8;

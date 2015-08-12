@@ -39,6 +39,8 @@ typedef char            int8_t;   // 1 byte
 #define SS_80COLOFF             0xC00C
 #define SS_80COLON              0xC00D
 
+#define ACTIVEPAGE              0xC01C
+
 #define SS_TEXTOFF              0xC050
 #define SS_TEXTON               0xC051
 #define SS_MIXEDOFF             0xC052
@@ -47,6 +49,7 @@ typedef char            int8_t;   // 1 byte
 #define SS_PAGE2ON              0xC055
 #define SS_HIRESOFF             0xC056
 #define SS_HIRESON              0xC057
+
 #define softsw(x)               POKE(x,0)
 
 #define LORES_PAGE1_BASE        0x400

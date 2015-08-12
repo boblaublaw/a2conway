@@ -95,6 +95,8 @@ void naive_wrap_engine(void)
             break;
         naive_analyze(gr_page[0], gr_page[1], 1);
         softsw(SS_PAGE2ON);
+        if (process_keys())
+            break;
         naive_analyze(gr_page[1], gr_page[0], 1);
         softsw(SS_PAGE2OFF);
     }
@@ -107,6 +109,8 @@ void naive_nowrap_engine(void)
             break;
         naive_analyze(gr_page[0], gr_page[1], 0);
         softsw(SS_PAGE2ON);
+        if (process_keys())
+            break;
         naive_analyze(gr_page[1], gr_page[0], 0);
         softsw(SS_PAGE2OFF);
     }
