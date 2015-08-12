@@ -3,15 +3,15 @@
 #include <stdio.h>      // printf
 
 
-#define INF_ROWABOVE(x) ( x == 0 ? MAXROWIDX  : (x - 1))
-#define INF_ROWBELOW(x) ( x == MAXROWIDX ? 0 : (x + 1))
-#define INF_COLLEFT(y)  ( y == 0 ? MAXCOLIDX  : (y - 1))
-#define INF_COLRIGHT(y) ( y == MAXCOLIDX ? 0 : (y + 1))
+#define WRAP_ROWABOVE(x) ( x == 0 ? MAXROWIDX  : (x - 1))
+#define WRAP_ROWBELOW(x) ( x == MAXROWIDX ? 0 : (x + 1))
+#define WRAP_COLLEFT(y)  ( y == 0 ? MAXCOLIDX  : (y - 1))
+#define WRAP_COLRIGHT(y) ( y == MAXCOLIDX ? 0 : (y + 1))
 
-#define FIN_ROWABOVE(x) ( x == 0 ? -1  : (x - 1))
-#define FIN_ROWBELOW(x) ( x == MAXROWIDX ? -1 : (x + 1))
-#define FIN_COLLEFT(y)  ( y == 0 ? -1  : (y - 1))
-#define FIN_COLRIGHT(y) ( y == MAXCOLIDX ? -1 : (y + 1))
+#define NOWRAP_ROWABOVE(x) ( x == 0 ? -1  : (x - 1))
+#define NOWRAP_ROWBELOW(x) ( x == MAXROWIDX ? -1 : (x + 1))
+#define NOWRAP_COLLEFT(y)  ( y == 0 ? -1  : (y - 1))
+#define NOWRAP_COLRIGHT(y) ( y == MAXCOLIDX ? -1 : (y + 1))
 
 /*
  * This is the totally unoptimized implementation of Conway's
@@ -30,46 +30,46 @@ uint8_t peek_pixel(uint16_t baseaddr[], int8_t row, int8_t col)
     return (((uint8_t *)baseaddr[row/2])[col] & MASK_BY_ROW(row)) ? 1 : 0;
 }
 
-uint8_t finite_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
+uint8_t nowrap_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
     uint8_t count = 0;
-    if (peek_pixel(baseaddr, FIN_ROWABOVE(row), col)) count++;
-    if (peek_pixel(baseaddr, FIN_ROWBELOW(row), col)) count++;
-    if (peek_pixel(baseaddr, row, FIN_COLLEFT(col))) count++;
-    if (peek_pixel(baseaddr, row, FIN_COLRIGHT(col))) count++;
-    if (peek_pixel(baseaddr, FIN_ROWABOVE(row), FIN_COLLEFT(col))) count++;
-    if (peek_pixel(baseaddr, FIN_ROWBELOW(row), FIN_COLLEFT(col))) count++;
-    if (peek_pixel(baseaddr, FIN_ROWABOVE(row), FIN_COLRIGHT(col))) count++;
-    if (peek_pixel(baseaddr, FIN_ROWBELOW(row), FIN_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, NOWRAP_ROWABOVE(row), col)) count++;
+    if (peek_pixel(baseaddr, NOWRAP_ROWBELOW(row), col)) count++;
+    if (peek_pixel(baseaddr, row, NOWRAP_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, row, NOWRAP_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, NOWRAP_ROWABOVE(row), NOWRAP_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, NOWRAP_ROWBELOW(row), NOWRAP_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, NOWRAP_ROWABOVE(row), NOWRAP_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, NOWRAP_ROWBELOW(row), NOWRAP_COLRIGHT(col))) count++;
     return count;
 }   
 
-uint8_t infinite_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
+uint8_t wrap_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
     uint8_t count = 0;
-    if (peek_pixel(baseaddr, INF_ROWABOVE(row), col)) count++;
-    if (peek_pixel(baseaddr, INF_ROWBELOW(row), col)) count++;
-    if (peek_pixel(baseaddr, row, INF_COLLEFT(col))) count++;
-    if (peek_pixel(baseaddr, row, INF_COLRIGHT(col))) count++;
-    if (peek_pixel(baseaddr, INF_ROWABOVE(row), INF_COLLEFT(col))) count++;
-    if (peek_pixel(baseaddr, INF_ROWBELOW(row), INF_COLLEFT(col))) count++;
-    if (peek_pixel(baseaddr, INF_ROWABOVE(row), INF_COLRIGHT(col))) count++;
-    if (peek_pixel(baseaddr, INF_ROWBELOW(row), INF_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, WRAP_ROWABOVE(row), col)) count++;
+    if (peek_pixel(baseaddr, WRAP_ROWBELOW(row), col)) count++;
+    if (peek_pixel(baseaddr, row, WRAP_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, row, WRAP_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, WRAP_ROWABOVE(row), WRAP_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, WRAP_ROWBELOW(row), WRAP_COLLEFT(col))) count++;
+    if (peek_pixel(baseaddr, WRAP_ROWABOVE(row), WRAP_COLRIGHT(col))) count++;
+    if (peek_pixel(baseaddr, WRAP_ROWBELOW(row), WRAP_COLRIGHT(col))) count++;
     return count;
 }   
 
 
-void naive_analyze(uint16_t src[], uint16_t dst[], uint8_t inf)
+void naive_analyze(uint16_t src[], uint16_t dst[], uint8_t wrap)
 {
     uint8_t row, col, n;
 
     for (row=0; row < MAXROWCNT; row++) {   
         for (col=0; col < MAXCOLCNT; col++) {
 
-            if (inf)
-                n = infinite_count_neighbors(src, row, col);
+            if (wrap)
+                n = wrap_count_neighbors(src, row, col);
             else
-                n = finite_count_neighbors(src, row, col);
+                n = nowrap_count_neighbors(src, row, col);
 
             if (peek_pixel(src, row, col)) {
                 if ((n == 2) || (n == 3))
@@ -88,7 +88,7 @@ void naive_analyze(uint16_t src[], uint16_t dst[], uint8_t inf)
     return;
 }
 
-void naive_inf_engine(void)
+void naive_wrap_engine(void)
 {
     while (1) {
         if (process_keys())
@@ -100,7 +100,7 @@ void naive_inf_engine(void)
     }
 }
 
-void naive_fin_engine(void)
+void naive_nowrap_engine(void)
 {
     while (1) {
         if (process_keys())

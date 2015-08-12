@@ -133,15 +133,15 @@ uint8_t process_keys(void)
             wait_for_keypress('p');
         }
         else if (c == '1') {
-            engine_sel=ENGINE_SEL_INF_NAIVE;
+            engine_sel=ENGINE_SEL_WRAP_NAIVE;
 #ifdef MIXED_MODE
-            printf("Infinite naive mode enabled.\n");
+            printf("Innowrap naive mode enabled.\n");
 #endif
             engine_state=ENGINE_RUN;
             return 1;
         }
         else if (c == '2') {
-            engine_sel=ENGINE_SEL_FIN_NAIVE;
+            engine_sel=ENGINE_SEL_NOWRAP_NAIVE;
             engine_state=ENGINE_RUN;
 #ifdef MIXED_MODE
             printf("Finite naive mode enabled.\n");
@@ -149,15 +149,15 @@ uint8_t process_keys(void)
             return 1;
         }
         else if (c == '3') {
-            engine_sel=ENGINE_SEL_INF_OPT;
+            engine_sel=ENGINE_SEL_WRAP_OPT;
             engine_state=ENGINE_RUN;
 #ifdef MIXED_MODE
-            printf("Infinite optimized mode enabled.\n");
+            printf("Innowrap optimized mode enabled.\n");
 #endif
             return 1;
         }
         else if (c == '4') {
-            engine_sel=ENGINE_SEL_FIN_OPT;
+            engine_sel=ENGINE_SEL_NOWRAP_OPT;
             engine_state=ENGINE_RUN;
 #ifdef MIXED_MODE
             printf("Finite optimized mode enabled.\n");
@@ -187,10 +187,10 @@ void startup(void)
     printf("\tg: spawn gosper glider gun\n");
     printf("\ts: spawn simkins glider gun\n");
     printf("\tp: pause\n");
-    printf("\t1: switch to infinite naive engine *\n");
-    printf("\t2: switch to finite naive engine\n");
-    printf("\t3: switch to infinite optimized engine\n");
-    printf("\t4: switch to finite optimized engine\n");
+    printf("\t1: switch to wraparound naive engine *\n");
+    printf("\t2: switch to nowrap naive engine\n");
+    printf("\t3: switch to wraparound optimized engine\n");
+    printf("\t4: switch to nowrap optimized engine\n");
     printf("\tq: quit\n\n");
     printf("* = default mode\n\n");
     printf("press enter to start\n");
@@ -199,7 +199,7 @@ void startup(void)
 
 int main(void)
 {
-    engine_sel = ENGINE_SEL_INF_NAIVE;
+    engine_sel = ENGINE_SEL_WRAP_NAIVE;
     engine_state = ENGINE_RUN;
 
     startup();
@@ -215,14 +215,14 @@ int main(void)
     glider(gr_page[0]);
 
     while (engine_state == ENGINE_RUN) {
-        if (engine_sel == ENGINE_SEL_INF_NAIVE)
-            naive_inf_engine();
-        else if (engine_sel == ENGINE_SEL_FIN_NAIVE)
-            naive_fin_engine();
-        else if (engine_sel == ENGINE_SEL_INF_OPT)
-            opt_inf_engine();
-        else if (engine_sel == ENGINE_SEL_FIN_OPT)
-            opt_fin_engine();
+        if (engine_sel == ENGINE_SEL_WRAP_NAIVE)
+            naive_wrap_engine();
+        else if (engine_sel == ENGINE_SEL_NOWRAP_NAIVE)
+            naive_nowrap_engine();
+        else if (engine_sel == ENGINE_SEL_WRAP_OPT)
+            opt_wrap_engine();
+        else if (engine_sel == ENGINE_SEL_NOWRAP_OPT)
+            opt_nowrap_engine();
         else {
 #ifdef MIXED_MODE
             printf("bogus engine selection!\n");

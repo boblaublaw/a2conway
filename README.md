@@ -18,12 +18,10 @@ Hotkeys can be pressed at any time during A2CONWAY execution:
  * g: clear the screen and spawn a gosper glider gun
  * s: clear the screen and spawn a simkins glider gun
  * p: pause
- * 1: switch to infinite naive engine (startup mode)
- * 2: switch to finite naive engine
- * 3: switch to infinite optimized engine
- * 4: switch to finite optimized engine
+ * 1: switch to wraparound naive engine (startup mode)
+ * 2: switch to nowrap naive engine
+ * 3: switch to wraparound optimized engine
+ * 4: switch to nowrap optimized engine
  * q: quit
 
-Note that multiple "engines" are implmented.  The naive engine is very slow, but the code is much easier to read.  The code in "opt1.c" is optmimized, improving performance and compromising readability.
-
-opt2.c is currently unimplemented.
+Note that multiple "engines" are implmented.  The naive engines are very slow, but their code is easier to read.

@@ -12,10 +12,10 @@ typedef char            int8_t;   // 1 byte
 #define ENGINE_STOP             0
 #define ENGINE_RUN              1
 
-#define ENGINE_SEL_INF_NAIVE    1
-#define ENGINE_SEL_FIN_NAIVE    2
-#define ENGINE_SEL_INF_OPT      3
-#define ENGINE_SEL_FIN_OPT      4
+#define ENGINE_SEL_WRAP_NAIVE   1
+#define ENGINE_SEL_NOWRAP_NAIVE 2
+#define ENGINE_SEL_WRAP_OPT     3
+#define ENGINE_SEL_NOWRAP_OPT   4
 
 #define ROWRANDMASK             0x00FF
 #define COLRANDMASK             0xFF00
@@ -73,7 +73,7 @@ uint8_t process_keys(void);
 void wait_for_keypress(uint8_t key);
 uint8_t peek_pixel(uint16_t baseaddr[], int8_t row, int8_t col);
 uint8_t count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col);
-void naive_inf_engine(void);
-void naive_fin_engine(void);
-void opt_inf_engine(void);
-void opt_fin_engine(void);
+void naive_wrap_engine(void);
+void naive_nowrap_engine(void);
+void opt_wrap_engine(void);
+void opt_nowrap_engine(void);
