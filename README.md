@@ -17,11 +17,11 @@ Hotkeys can be pressed at any time during A2CONWAY execution:
  * r: randomize the screen with 400 live cells
  * g: clear the screen and spawn a gosper glider gun
  * s: clear the screen and spawn a simkins glider gun
- * i: toggle finite edge wrap (naive mode only)
  * p: pause
- * 1: switch to naive engine
- * 2: switch to optimized engine 1
- * 3: switch to optimized engine 2 (unimplemented)
+ * 1: switch to infinite naive engine (startup mode)
+ * 2: switch to finite naive engine
+ * 3: switch to infinite optimized engine
+ * 4: switch to finite optimized engine
  * q: quit
 
 Note that multiple "engines" are implmented.  The naive engine is very slow, but the code is much easier to read.  The code in "opt1.c" is optmimized, improving performance and compromising readability.
