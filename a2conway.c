@@ -5,6 +5,7 @@
 #include <stdlib.h>     // srand, rand
 #include <stdio.h>      // printf
 #include <string.h>
+#include <ctype.h>      // tolower
 #include <conio.h>      // kbhit, cgetc
 #include <peekpoke.h>   // POKE
 #include "a2conway.h"   // prototypes
@@ -183,7 +184,6 @@ uint8_t process_keys(void)
     if (kbhit() > 0) {
         c=cgetc();
         CLEARKEYBUF;
-
         if (c == 'p') {
 #ifdef MIXED_MODE
             printf("PAUSED. Press p to Continue.\n");
@@ -222,7 +222,7 @@ uint8_t process_keys(void)
 #endif
             return 1;
         }
-        else if (c == 'q') {
+        else if (tolower(c) == 'q') {
             engine_state=ENGINE_STOP;
             return 1;
         }
@@ -240,11 +240,11 @@ uint8_t process_keys(void)
 #endif
             memcpy((uint8_t *)0x400,0x5000,0x800);
         }
-        else if (c == 'r')
+        else if (tolower(c) == 'r')
             randomize(gr_page[find_page()], 400);
-        else if (c == 'g')
+        else if (tolower(c) == 'g')
             gospergun(gr_page[find_page()]);
-        else if (c == 's')
+        else if (tolower(c) == 's')
             simkins(gr_page[find_page()]);
     }
     return 0;
