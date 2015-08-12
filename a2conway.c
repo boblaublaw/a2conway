@@ -193,7 +193,7 @@ uint8_t process_keys(void)
         else if (c == '1') {
             engine_sel=ENGINE_SEL_WRAP_NAIVE;
 #ifdef MIXED_MODE
-            printf("Innowrap naive mode enabled.\n");
+            printf("Naive wrap mode enabled.\n");
 #endif
             engine_state=ENGINE_RUN;
             return 1;
@@ -202,7 +202,7 @@ uint8_t process_keys(void)
             engine_sel=ENGINE_SEL_NOWRAP_NAIVE;
             engine_state=ENGINE_RUN;
 #ifdef MIXED_MODE
-            printf("Finite naive mode enabled.\n");
+            printf("Naive nowrap mode enabled.\n");
 #endif
             return 1;
         }
@@ -210,7 +210,7 @@ uint8_t process_keys(void)
             engine_sel=ENGINE_SEL_WRAP_OPT;
             engine_state=ENGINE_RUN;
 #ifdef MIXED_MODE
-            printf("Innowrap optimized mode enabled.\n");
+            printf("Optimized wrap mode enabled.\n");
 #endif
             return 1;
         }
@@ -218,7 +218,7 @@ uint8_t process_keys(void)
             engine_sel=ENGINE_SEL_NOWRAP_OPT;
             engine_state=ENGINE_RUN;
 #ifdef MIXED_MODE
-            printf("Finite optimized mode enabled.\n");
+            printf("Optimized nowrap mode enabled.\n");
 #endif
             return 1;
         }
