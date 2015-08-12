@@ -22,9 +22,6 @@
 // cell processing "engine" to use.
 uint8_t engine_sel, engine_state;
 
-// infinity determines if the world wraps around at the edges
-uint8_t infinity;
-
 uint16_t gr_page[2][24]={ {
     // first page of lores graphics memory is 24 pairs of rows
     0x0400, 0x0480, 0x0500, 0x0580, 0x0600, 0x0680, 0x0700, 0x0780,
@@ -120,17 +117,6 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     }
 }
 
-void toggle_infinity(void)
-{
-    if (infinity == INFINITE)
-        infinity = FINITE;
-    else
-        infinity = INFINITE;
-#ifdef MIXED_MODE
-    printf ("toggling infinity to %s\n", (infinity ? "on" : "off"));
-#endif
-}
-
 // returning 1 will cause the currently running engine to exit
 uint8_t process_keys(void) 
 {
@@ -147,32 +133,41 @@ uint8_t process_keys(void)
             wait_for_keypress('p');
         }
         else if (c == '1') {
-            engine_sel=ENGINE_SEL_NAIVE;
+            engine_sel=ENGINE_SEL_INF_NAIVE;
+#ifdef MIXED_MODE
+            printf("Infinite naive mode enabled.\n");
+#endif
             engine_state=ENGINE_RUN;
             return 1;
         }
         else if (c == '2') {
-            engine_sel=ENGINE_SEL_OPT1;
+            engine_sel=ENGINE_SEL_FIN_NAIVE;
             engine_state=ENGINE_RUN;
-            return 1;
-        }
-#if 0
-        else if (c == '3') {
-            engine_sel=ENGINE_SEL_OPT2;
-            engine_state=ENGINE_RUN;
-            return 1;
-        }
+#ifdef MIXED_MODE
+            printf("Finite naive mode enabled.\n");
 #endif
+            return 1;
+        }
+        else if (c == '3') {
+            engine_sel=ENGINE_SEL_INF_OPT;
+            engine_state=ENGINE_RUN;
+#ifdef MIXED_MODE
+            printf("Infinite optimized mode enabled.\n");
+#endif
+            return 1;
+        }
+        else if (c == '4') {
+            engine_sel=ENGINE_SEL_FIN_OPT;
+            engine_state=ENGINE_RUN;
+#ifdef MIXED_MODE
+            printf("Finite optimized mode enabled.\n");
+#endif
+            return 1;
+        }
         else if (c == 'q') {
             engine_state=ENGINE_STOP;
             return 1;
         }
-        else if (c == 'i')
-            if (engine_sel != ENGINE_SEL_NAIVE) {
-                printf("finite field not supported outside naive engine\n");
-            } 
-            else 
-                toggle_infinity();
         else if (c == 'r') 
             randomize(gr_page[0], 400);
         else if (c == 'g')
@@ -185,25 +180,26 @@ uint8_t process_keys(void)
 
 void startup(void)
 {
+    printf("A2Conway - by joe.boyle@gmail.com\n\n");
     printf("built at %s %s\n", __DATE__, __TIME__);
     printf("\nHotkeys:\n");
     printf("\tr: randomize\n");
-    printf("\tg: gosper glider gun\n");
-    printf("\ts: simkins glider gun\n");
-    printf("\ti: toggle finite edge wrap (naive only)\n");
+    printf("\tg: spawn gosper glider gun\n");
+    printf("\ts: spawn simkins glider gun\n");
     printf("\tp: pause\n");
-    printf("\t1: switch to naive engine\n");
-    printf("\t2: switch to optimized engine 1\n");
-    printf("\t3: switch to optimized engine 2\n");
-    printf("\tq: quit\n");
+    printf("\t1: switch to infinite naive engine *\n");
+    printf("\t2: switch to finite naive engine\n");
+    printf("\t3: switch to infinite optimized engine\n");
+    printf("\t4: switch to finite optimized engine\n");
+    printf("\tq: quit\n\n");
+    printf("* = default mode\n\n");
     printf("press enter to start\n");
     wait_for_keypress(CH_ENTER);
 }
 
 int main(void)
 {
-    infinity = FINITE;
-    engine_sel = ENGINE_SEL_OPT1;
+    engine_sel = ENGINE_SEL_INF_NAIVE;
     engine_state = ENGINE_RUN;
 
     startup();
@@ -219,12 +215,21 @@ int main(void)
     glider(gr_page[0]);
 
     while (engine_state == ENGINE_RUN) {
-        if (engine_sel == ENGINE_SEL_NAIVE)
-            naive_engine();
-        else if (engine_sel == ENGINE_SEL_OPT1)
-            opt1_engine();
-        else
-            opt2_engine();
+        if (engine_sel == ENGINE_SEL_INF_NAIVE)
+            naive_inf_engine();
+        else if (engine_sel == ENGINE_SEL_FIN_NAIVE)
+            naive_fin_engine();
+        else if (engine_sel == ENGINE_SEL_INF_OPT)
+            opt_inf_engine();
+        else if (engine_sel == ENGINE_SEL_FIN_OPT)
+            opt_fin_engine();
+        else {
+#ifdef MIXED_MODE
+            printf("bogus engine selection!\n");
+#endif
+            engine_state = ENGINE_STOP;
+        }
+        
     }
     
     // all done
