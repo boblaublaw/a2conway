@@ -21,6 +21,9 @@
 
 extern uint16_t gr_page[2][24];
 
+/*
+ * peeks into memory to determine if a pixel is live
+ */
 uint8_t peek_pixel(uint16_t baseaddr[], int8_t row, int8_t col)
 {
     if ((row == 255) || (col == 255)) {
@@ -30,6 +33,9 @@ uint8_t peek_pixel(uint16_t baseaddr[], int8_t row, int8_t col)
     return (((uint8_t *)baseaddr[row/2])[col] & MASK_BY_ROW(row)) ? 1 : 0;
 }
 
+/* 
+ * counts the neighboring cells in memory around a given cell
+ */
 uint8_t nowrap_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
     uint8_t count = 0;
@@ -44,6 +50,9 @@ uint8_t nowrap_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
     return count;
 }   
 
+/* 
+ * counts the neighboring cells in memory around a given cell
+ */
 uint8_t wrap_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
 {
     uint8_t count = 0;
@@ -58,7 +67,9 @@ uint8_t wrap_count_neighbors(uint16_t baseaddr[], uint8_t row, uint8_t col)
     return count;
 }   
 
-
+/* 
+ * scans src page and writes results into dst page
+ */
 void naive_analyze(uint16_t src[], uint16_t dst[], uint8_t wrap)
 {
     uint8_t row, col, n;

@@ -35,6 +35,10 @@ uint16_t gr_page[2][24]={ {
 /*
  * FUNCTIONS:
  */
+
+/*
+ * wait for a specific key to be pressed
+ */
 void wait_for_keypress(uint8_t key)
 {
     uint8_t c;
@@ -52,6 +56,9 @@ void wait_for_keypress(uint8_t key)
     }
 }
 
+/*
+ * set the soft swiches for text mode
+ */
 void text_mode(void)
 {
     softsw(SS_TEXTON);
@@ -59,6 +66,9 @@ void text_mode(void)
     softsw(SS_PAGE2OFF);
 }
 
+/*
+ * set the soft switches for lores graphics mode
+ */
 void gr_mode(uint16_t page, uint16_t mode)
 {
     softsw(SS_TEXTOFF);
@@ -67,6 +77,10 @@ void gr_mode(uint16_t page, uint16_t mode)
     softsw(SS_HIRESOFF);
 }
 
+/*
+ * clear the requested lo-res graphics page with
+ * a specified color
+ */
 void lo_clear(uint16_t baseaddr[], uint8_t color)
 {
     int8_t idx;
@@ -81,6 +95,10 @@ void lo_clear(uint16_t baseaddr[], uint8_t color)
     }
 }
 
+/*
+ * plot an x,y pixel on the requested graphics page of the requested
+ * color.  (Lo-res color is 4 bits wide)
+ */
 void lo_plot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
 {
     uint8_t pairrow = row / 2;
@@ -95,6 +113,10 @@ void lo_plot(uint16_t baseaddr[], uint8_t row, uint8_t col, uint8_t color)
     }
 }
 
+/*
+ * create a bunch of random live cells in the requested
+ * graphics page
+ */
 void randomize(uint16_t baseaddr[], uint16_t count)
 {
     uint16_t r;
@@ -120,13 +142,17 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     }
 }
 
+/*
+ * determine which graphics page is active
+ */
 uint8_t find_page(void)
 {
-    printf("peek result %x\n", PEEK(ACTIVEPAGE));
     return (PEEK(ACTIVEPAGE) & 0x80 ? 1 : 0);
 }
 
-// returning 1 will cause the currently running engine to exit
+/*
+ * returning 1 will cause the currently running engine to exit
+ */
 uint8_t process_keys(void) 
 {
     uint8_t c;
@@ -187,6 +213,9 @@ uint8_t process_keys(void)
     return 0;
 }
 
+/*
+ * print the startup message
+ */
 void startup(void)
 {
     printf("A2Conway - by joe.boyle@gmail.com\n\n");
