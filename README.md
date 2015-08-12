@@ -26,3 +26,6 @@ Hotkeys can be pressed at any time during A2CONWAY execution:
  * q: quit
 
 Note that multiple "engines" are implmented.  The naive engines are very slow, but their code is easier to read.
+
+Here's an example of a gosper gun in action:
+![preview image](https://dl.dropboxusercontent.com/u/16918424/a2conway.jpg)
