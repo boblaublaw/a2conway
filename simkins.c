@@ -1,4 +1,4 @@
-#include <apple2enh.h>          // CH_ENTER, TGI_*
+#include <apple2enh.h>          // CH_ENTER, COLOR_*
 #include "a2conway.h"
 
 /*
@@ -7,7 +7,7 @@
 
 void simkins(uint16_t page[])
 {
-        lo_clear(page, TGI_COLOR_BLACK);
+        lo_clear(page, COLOR_BLACK);
         lo_plot(page, 0, 0, 0xf);
         lo_plot(page, 0, 1, 0xf);
         lo_plot(page, 0, 7, 0xf);

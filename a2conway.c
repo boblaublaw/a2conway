@@ -8,6 +8,7 @@
 #include <ctype.h>      // tolower
 #include <conio.h>      // kbhit, cgetc
 #include <peekpoke.h>   // POKE
+#include <apple2enh.h>          // CH_ENTER, COLOR_*
 #include "a2conway.h"   // prototypes
 
 /*
@@ -129,7 +130,7 @@ void randomize(uint16_t baseaddr[], uint16_t count)
     uint16_t seed = PEEK(RSEED1) + PEEK(RSEED2) * 256;
     ++resetcount;
     srand(resetcount + seed);
-    lo_clear(gr_page[0], TGI_COLOR_BLACK);
+    lo_clear(gr_page[0], COLOR_BLACK);
 
     while (count--) {
         r = rand();
