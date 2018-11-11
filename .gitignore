@@ -1,0 +1,4 @@
+*.o
+*.map
+*.s
+a2conway
