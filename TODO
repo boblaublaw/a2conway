@@ -1,0 +1,2 @@
+ - if available, use VBL interrupt to count FPS
+ - double lo-res
